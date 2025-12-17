@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { formatDateBR } from "@/lib/formatDate"
-import type { Occurrence } from "@/types/occurrence"
+import { formatDateBR } from "@/lib/formatDate";
+import type { Occurrence } from "@/types/occurrence";
 import {
   Package,
   Truck,
@@ -18,17 +18,22 @@ import {
   Trash2,
   FileText,
   Hash,
-} from "lucide-react"
+} from "lucide-react";
 
 interface OccurrenceCardProps {
-  item: Occurrence
-  onEdit: (item: Occurrence) => void
-  onDelete: (id: string) => void
+  item: Occurrence;
+  onEdit: (item: Occurrence) => void;
+  onDelete: (id: string) => void;
 }
 
-const isValidValue = (value?: string) => (value && value !== "#VALUE!" ? value : "")
+const isValidValue = (value?: string) =>
+  value && value !== "#VALUE!" ? value : "";
 
-export default function OccurrenceCard({ item, onEdit, onDelete }: OccurrenceCardProps) {
+export default function OccurrenceCard({
+  item,
+  onEdit,
+  onDelete,
+}: OccurrenceCardProps) {
   const getStatusConfig = (status: string) => {
     const configs: Record<
       string,
@@ -64,12 +69,12 @@ export default function OccurrenceCard({ item, onEdit, onDelete }: OccurrenceCar
         icon: <AlertCircle className="w-4 h-4" />,
         dot: "bg-orange-500",
       },
-    }
+    };
 
-    return configs[status] || configs.Pendente
-  }
+    return configs[status] || configs.Pendente;
+  };
 
-  const statusConfig = getStatusConfig(item.status)
+  const statusConfig = getStatusConfig(item.status);
 
   return (
     <div className="bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-300 overflow-hidden">
@@ -81,23 +86,32 @@ export default function OccurrenceCard({ item, onEdit, onDelete }: OccurrenceCar
               <Package className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-white font-bold text-xl sm:text-2xl">NF {item.nota}</h3>
-              <div className="flex flex-wrap items-center gap-2 mt-2">
-                <span className="text-white text-xs sm:text-sm bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-md font-medium">
-                  Pedido {item.pedido}
-                </span>
-                <span className="text-white text-xs sm:text-sm bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-md font-medium">
-                  {item.volumes} volumes
-                </span>
-              </div>
+              <h3 className="text-white font-bold text-xl sm:text-2xl">
+                NF {item.nota}
+              </h3>
             </div>
           </div>
 
           <span
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold ${statusConfig.bg} ${statusConfig.text} border ${statusConfig.text.replace('text-', 'border-')} self-start`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold ${
+              statusConfig.bg
+            } ${statusConfig.text} border ${statusConfig.text.replace(
+              "text-",
+              "border-"
+            )} self-start`}
           >
-            <span className={`w-2 h-2 rounded-full ${statusConfig.dot} animate-pulse`}></span>
+            <span
+              className={`w-2 h-2 rounded-full ${statusConfig.dot} animate-pulse`}
+            ></span>
             {item.status}
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 mt-2">
+          <span className="text-white text-xs sm:text-xs bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-md font-medium">
+            Pedido: {item.pedido}
+          </span>
+          <span className="text-white text-xs sm:text-xs bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-md font-medium">
+            volumes: {item.volumes}
           </span>
         </div>
       </div>
@@ -126,9 +140,13 @@ export default function OccurrenceCard({ item, onEdit, onDelete }: OccurrenceCar
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4 hover:border-blue-300 transition-colors">
               <div className="flex items-center gap-2 mb-1.5">
                 <Hash className="w-4 h-4 text-gray-600" />
-                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Tracking</p>
+                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                  Tracking
+                </p>
               </div>
-              <p className="text-gray-900 font-mono font-semibold text-sm sm:text-base break-all">{item.tracking}</p>
+              <p className="text-gray-900 font-mono font-semibold text-sm sm:text-base break-all">
+                {item.tracking}
+              </p>
             </div>
           )}
         </div>
@@ -141,7 +159,9 @@ export default function OccurrenceCard({ item, onEdit, onDelete }: OccurrenceCar
                 <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1">Destino</p>
+                <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-1">
+                  Destino
+                </p>
                 <p className="text-gray-900 font-semibold text-sm sm:text-base">
                   {item.destino} {item.estado && `- ${item.estado}`}
                 </p>
@@ -154,27 +174,48 @@ export default function OccurrenceCard({ item, onEdit, onDelete }: OccurrenceCar
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
           <div className="flex items-center gap-2 mb-3">
             <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-            <p className="text-xs sm:text-sm font-bold text-gray-700 uppercase tracking-wide">Linha do Tempo</p>
+            <p className="text-xs sm:text-sm font-bold text-gray-700 uppercase tracking-wide">
+              Linha do Tempo
+            </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <DateInfo label="Data da Nota" value={formatDateBR(item.dataNota)} />
-            <DateInfo label="Ocorrência" value={formatDateBR(item.dataOcorrencia)} />
-            <DateInfo label="Última Atualização" value={formatDateBR(item.ultimaOcorrencia)} />
+            <DateInfo
+              label="Data da Nota"
+              value={formatDateBR(item.dataNota)}
+            />
+            <DateInfo
+              label="Ocorrência"
+              value={formatDateBR(item.dataOcorrencia)}
+            />
+            <DateInfo
+              label="Última Atualização"
+              value={formatDateBR(item.ultimaOcorrencia)}
+            />
           </div>
         </div>
 
         {/* Detailed Status */}
         {(item.statusCliente || item.statusTransportadora) && (
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <p className="text-xs sm:text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">Status Detalhado</p>
+            <p className="text-xs sm:text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">
+              Status Detalhado
+            </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="bg-white border border-gray-200 rounded-lg p-3 hover:border-blue-300 transition-colors">
-                <p className="text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Cliente</p>
-                <p className="text-sm font-medium text-gray-900">{item.statusCliente || "-"}</p>
+                <p className="text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">
+                  Cliente
+                </p>
+                <p className="text-sm font-medium text-gray-900">
+                  {item.statusCliente || "-"}
+                </p>
               </div>
               <div className="bg-white border border-gray-200 rounded-lg p-3 hover:border-blue-300 transition-colors">
-                <p className="text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Transportadora</p>
-                <p className="text-sm font-medium text-gray-900">{item.statusTransportadora || "-"}</p>
+                <p className="text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">
+                  Transportadora
+                </p>
+                <p className="text-sm font-medium text-gray-900">
+                  {item.statusTransportadora || "-"}
+                </p>
               </div>
             </div>
           </div>
@@ -187,7 +228,9 @@ export default function OccurrenceCard({ item, onEdit, onDelete }: OccurrenceCar
               <TextBlock
                 title="Ocorrência"
                 value={item.ocorrencia}
-                icon={<AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />}
+                icon={
+                  <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                }
               />
             )}
             {item.pendencia && (
@@ -201,7 +244,9 @@ export default function OccurrenceCard({ item, onEdit, onDelete }: OccurrenceCar
               <TextBlock
                 title="Observações"
                 value={item.obs}
-                icon={<FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />}
+                icon={
+                  <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                }
               />
             )}
           </div>
@@ -226,7 +271,7 @@ export default function OccurrenceCard({ item, onEdit, onDelete }: OccurrenceCar
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 /* Componentes auxiliares */
@@ -236,38 +281,38 @@ function InfoCard({
   label,
   value,
 }: {
-  icon: React.ReactNode
-  label: string
-  value?: string
+  icon: React.ReactNode;
+  label: string;
+  value?: string;
 }) {
-  if (!value) return null
+  if (!value) return null;
 
   return (
     <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4 hover:border-blue-300 transition-colors">
       <div className="flex items-center gap-2.5 sm:gap-3">
         <div className="bg-blue-100 p-2 rounded-lg flex-shrink-0">{icon}</div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">{label}</p>
-          <p className="text-gray-900 font-semibold text-sm sm:text-base truncate">{value}</p>
+          <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">
+            {label}
+          </p>
+          <p className="text-gray-900 font-semibold text-sm sm:text-base truncate">
+            {value}
+          </p>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-function DateInfo({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
+function DateInfo({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-white border border-blue-200 rounded-lg p-3 hover:border-blue-300 transition-colors">
-      <p className="text-xs font-semibold text-blue-600 mb-1.5 uppercase tracking-wide">{label}</p>
+      <p className="text-xs font-semibold text-blue-600 mb-1.5 uppercase tracking-wide">
+        {label}
+      </p>
       <p className="text-gray-900 font-semibold text-xs sm:text-sm">{value}</p>
     </div>
-  )
+  );
 }
 
 function TextBlock({
@@ -275,17 +320,19 @@ function TextBlock({
   value,
   icon,
 }: {
-  title: string
-  value: string
-  icon: React.ReactNode
+  title: string;
+  value: string;
+  icon: React.ReactNode;
 }) {
   return (
     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
       <div className="flex items-center gap-2 mb-2">
         {icon}
-        <p className="text-xs sm:text-sm font-bold text-gray-700 uppercase tracking-wide">{title}</p>
+        <p className="text-xs sm:text-sm font-bold text-gray-700 uppercase tracking-wide">
+          {title}
+        </p>
       </div>
       <p className="text-sm text-gray-700 leading-relaxed">{value}</p>
     </div>
-  )
+  );
 }
