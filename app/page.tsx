@@ -1,33 +1,44 @@
-'use client';
+"use client";
 
-import { Package, Truck, Plus, RefreshCw } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import type { Occurrence } from '@/types/occurrence';
-import OccurrenceCard from '@/components/OccurrenceCard';
-import Stats from '@/components/Stats';
-import OccurrenceModal from '@/components/OccurrenceModal';
+import { Package, Truck, Plus, RefreshCw } from "lucide-react";
+import { useState, useEffect } from "react";
+import type { Occurrence } from "@/types/occurrence";
+import OccurrenceCard from "@/components/OccurrenceCard";
+import Stats from "@/components/Stats";
+import OccurrenceModal from "@/components/OccurrenceModal";
 
 export default function Home() {
   const [list, setList] = useState<Occurrence[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingOccurrence, setEditingOccurrence] = useState<Occurrence | null>(null);
+  const [editingOccurrence, setEditingOccurrence] = useState<Occurrence | null>(
+    null
+  );
   const [refreshing, setRefreshing] = useState(false);
+  const [sheet, setSheet] = useState<"SP" | "PE" | "ES">("SP");
+  const [statusFilter, setStatusFilter] = useState<
+    "Todos" | "Pendente" | "Em Andamento" | "Resolvido"
+  >("Todos");
+
+  const filteredList = list.filter((item) => {
+    if (statusFilter === "Todos") return true;
+    return item.status === statusFilter;
+  });
 
   // Carregar ocorrências do Google Sheets
   const fetchOccurrences = async () => {
     try {
       setRefreshing(true);
-      const response = await fetch('/api/occurrences');
-    
+      const response = await fetch(`/api/occurrences?sheet=${sheet}`);
+
       if (response.ok) {
         const data = await response.json();
         setList(data);
-          console.log('Response status:', data);
+        console.log("Response status:", data);
       }
     } catch (error) {
-      console.error('Erro ao carregar ocorrências:', error);
-      alert('Erro ao carregar ocorrências do Google Sheets');
+      console.error("Erro ao carregar ocorrências:", error);
+      alert("Erro ao carregar ocorrências do Google Sheets");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -36,16 +47,16 @@ export default function Home() {
 
   useEffect(() => {
     fetchOccurrences();
-  }, []);
+  }, [sheet]);
 
   // Criar ou atualizar ocorrência
   const handleSubmit = async (occurrence: Occurrence) => {
     try {
       if (editingOccurrence?.id) {
         // Atualizar
-        const response = await fetch(`/api/occurrences/${editingOccurrence.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+        const response = await fetch(`/api/occurrences?sheet=${sheet}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(occurrence),
         });
 
@@ -53,44 +64,44 @@ export default function Home() {
           await fetchOccurrences();
           setIsModalOpen(false);
           setEditingOccurrence(null);
-          alert('Ocorrência atualizada com sucesso!');
+          alert("Ocorrência atualizada com sucesso!");
         }
       } else {
         // Criar
-        const response = await fetch('/api/occurrences', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const response = await fetch(`/api/occurrences?sheet=${sheet}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(occurrence),
         });
 
         if (response.ok) {
           await fetchOccurrences();
           setIsModalOpen(false);
-          alert('Ocorrência criada com sucesso!');
+          alert("Ocorrência criada com sucesso!");
         }
       }
     } catch (error) {
-      console.error('Erro ao salvar ocorrência:', error);
-      alert('Erro ao salvar ocorrência no Google Sheets');
+      console.error("Erro ao salvar ocorrência:", error);
+      alert("Erro ao salvar ocorrência no Google Sheets");
     }
   };
 
   // Deletar ocorrência
   const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja deletar esta ocorrência?')) return;
+    if (!confirm("Tem certeza que deseja deletar esta ocorrência?")) return;
 
     try {
       const response = await fetch(`/api/occurrences/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (response.ok) {
         await fetchOccurrences();
-        alert('Ocorrência deletada com sucesso!');
+        alert("Ocorrência deletada com sucesso!");
       }
     } catch (error) {
-      console.error('Erro ao deletar ocorrência:', error);
-      alert('Erro ao deletar ocorrência do Google Sheets');
+      console.error("Erro ao deletar ocorrência:", error);
+      alert("Erro ao deletar ocorrência do Google Sheets");
     }
   };
 
@@ -111,7 +122,9 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600 font-semibold">Carregando ocorrências...</p>
+          <p className="text-slate-600 font-semibold">
+            Carregando ocorrências...
+          </p>
         </div>
       </div>
     );
@@ -139,12 +152,28 @@ export default function Home() {
             </div>
 
             <div className="flex gap-3 items-center">
+              <div className="flex gap-2">
+                {["SP", "PE", "ES"].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSheet(s as any)}
+                    className={`px-4 py-2 rounded-lg ${
+                      sheet === s ? "bg-blue-600 text-white" : "bg-slate-200"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+
               <button
                 onClick={fetchOccurrences}
                 disabled={refreshing}
                 className="flex items-center gap-2 bg-slate-600 hover:bg-slate-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
               >
-                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
+                />
                 Atualizar
               </button>
               <button
@@ -161,16 +190,20 @@ export default function Home() {
 
       {/* STATS */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-6">
-        <Stats list={list} />
+        <Stats
+          list={list}
+          activeFilter={statusFilter}
+          onFilterChange={setStatusFilter}
+        />
       </div>
 
       {/* LISTA */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {list.length > 0 ? (
-            list.map((item, i) => (
+          {filteredList.length > 0 ? (
+            filteredList.map((item) => (
               <OccurrenceCard
-                key={item.id || i}
+                key={item.nota}
                 item={item}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
