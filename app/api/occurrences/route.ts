@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server';
 import { GoogleSheetsService } from '@/lib/googleSheets';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const occurrences = await GoogleSheetsService.getOccurrences();
-  /*   console.log('Todas as ocorrencias', occurrences); */
+    const { searchParams } = new URL(request.url);
+    const sheet = searchParams.get('sheet') || 'SP'; // default
+
+    const occurrences = await GoogleSheetsService.getOccurrences(sheet);
+
     return NextResponse.json(occurrences);
   } catch (error) {
-    console.error('API Error:', error);
     return NextResponse.json(
       { error: 'Erro ao buscar ocorrências' },
       { status: 500 }
@@ -15,12 +17,16 @@ export async function GET() {
   }
 }
 
+
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const occurrence = await GoogleSheetsService.createOccurrence(body);
-    console.log('Todas as ocorrencias', occurrence);
-    return NextResponse.json(occurrence, { status: 201 });
+   const { searchParams } = new URL(request.url);
+  const sheet = searchParams.get('sheet') || 'SP';
+
+  const body = await request.json();
+  const occurrence = await GoogleSheetsService.createOccurrence(sheet, body);
+
+  return NextResponse.json(occurrence, { status: 201 });
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json(
