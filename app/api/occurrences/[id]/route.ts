@@ -6,9 +6,9 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const body = await request.json();
-    const occurrence = await GoogleSheetsService.updateOccurrence(params.id, body);
-    return NextResponse.json(occurrence);
+   const sheet = new URL(request.url).searchParams.get('sheet') || 'SP';
+   await GoogleSheetsService.updateOccurrence(sheet, params.id, await request.json());
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('API Error:', error);
     return NextResponse.json(
@@ -22,14 +22,9 @@ export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  try {
-    await GoogleSheetsService.deleteOccurrence(params.id);
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('API Error:', error);
-    return NextResponse.json(
-      { error: 'Erro ao deletar ocorrência' },
-      { status: 500 }
-    );
-  }
+  const sheet = new URL(request.url).searchParams.get('sheet') || 'SP';
+  await GoogleSheetsService.deleteOccurrence(sheet, params.id);
+  return NextResponse.json({ success: true });
 }
+
+
