@@ -17,3 +17,42 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+/* No seu arquivo CSS global */
+@layer base {
+  /* Altera a cor do ícone do calendário no Chrome/Edge/Safari */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%232DD4BF" viewBox="0 0 16 16"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/></svg>');
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px;
+  }
+
+  /* Faz com que o input inteiro abra o calendário ao clicar, não só no ícone */
+  input[type="date"]::-webkit-wrapper {
+    display: flex;
+    align-items: center;
+  }
+}
+
+/* Verifique se não há nenhum overflow:hidden global atrapalhando */
+.custom-scrollbar {
+  scrollbar-gutter: stable; /* Evita que o layout "pule" quando o scroll aparece */
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #2a2a2a; /* Cor cinza escuro da sua paleta */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #2dd4bf; /* Seu verde água no hover */
+}
