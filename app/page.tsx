@@ -146,7 +146,7 @@ export default function Home() {
                   Ocorrências de Transporte
                 </h1>
                 <p className="text-sm text-slate-500 mt-1">
-                  Gerencie e acompanhe todas as ocorrências via Google Sheets
+                 Sistema de Gestão de Ocorrências.
                 </p>
               </div>
             </div>
