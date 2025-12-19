@@ -234,6 +234,7 @@ export default function Home() {
         }}
         onSubmit={handleSubmit}
         editingOccurrence={editingOccurrence}
+        sheet={sheet}
       />
     </div>
   );
