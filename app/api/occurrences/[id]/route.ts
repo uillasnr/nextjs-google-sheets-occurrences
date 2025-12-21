@@ -1,5 +1,6 @@
+import { GoogleSheetsService } from '@/app/services/googleSheets/GoogleSheetsService';
 import { NextResponse } from 'next/server';
-import { GoogleSheetsService } from '@/lib/googleSheets';
+
 
 export async function PUT(
   request: Request,
@@ -23,7 +24,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   const sheet = new URL(request.url).searchParams.get('sheet') || 'SP';
-  await GoogleSheetsService.deleteOccurrence(sheet, params.id);
+await GoogleSheetsService.deleteOccurrence(params.id, sheet);
+
   return NextResponse.json({ success: true });
 }
 

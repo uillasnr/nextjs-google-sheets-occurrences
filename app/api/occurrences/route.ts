@@ -1,5 +1,6 @@
+import { GoogleSheetsService } from '@/app/services/googleSheets/GoogleSheetsService';
 import { NextResponse } from 'next/server';
-import { GoogleSheetsService } from '@/lib/googleSheets';
+
 
 export async function GET(request: Request) {
   try {
