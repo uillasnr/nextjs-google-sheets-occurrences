@@ -17,6 +17,7 @@ import {
 import type { Occurrence } from "@/types/occurrence";
 import { TIPO_OCORRENCIA_MAP } from "@/types/occurrence";
 
+
 interface OccurrenceModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -47,36 +48,35 @@ const emptyForm: Occurrence = {
   status: "Em analise",
 };
 
-const ESTADOS_BRASILEIROS = [
-  { value: "", label: "Selecione..." },
-  { value: "AC", label: "Acre" },
-  { value: "AL", label: "Alagoas" },
-  { value: "AP", label: "Amapá" },
-  { value: "AM", label: "Amazonas" },
-  { value: "BA", label: "Bahia" },
-  { value: "CE", label: "Ceará" },
-  { value: "DF", label: "Distrito Federal" },
-  { value: "ES", label: "Espírito Santo" },
-  { value: "GO", label: "Goiás" },
-  { value: "MA", label: "Maranhão" },
-  { value: "MT", label: "Mato Grosso" },
-  { value: "MS", label: "Mato Grosso do Sul" },
-  { value: "MG", label: "Minas Gerais" },
-  { value: "PA", label: "Pará" },
-  { value: "PB", label: "Paraíba" },
-  { value: "PR", label: "Paraná" },
-  { value: "PE", label: "Pernambuco" },
-  { value: "PI", label: "Piauí" },
-  { value: "RJ", label: "Rio de Janeiro" },
-  { value: "RN", label: "Rio Grande do Norte" },
-  { value: "RS", label: "Rio Grande do Sul" },
-  { value: "RO", label: "Rondônia" },
-  { value: "RR", label: "Roraima" },
-  { value: "SC", label: "Santa Catarina" },
-  { value: "SP", label: "São Paulo" },
-  { value: "SE", label: "Sergipe" },
-  { value: "TO", label: "Tocantins" },
-];
+const ESTADO_SIGLA_PARA_NOME: Record<string, string> = {
+  AC: "Acre",
+  AL: "Alagoas",
+  AP: "Amapá",
+  AM: "Amazonas",
+  BA: "Bahia",
+  CE: "Ceará",
+  DF: "Distrito Federal",
+  ES: "Espírito Santo",
+  GO: "Goiás",
+  MA: "Maranhão",
+  MT: "Mato Grosso",
+  MS: "Mato Grosso do Sul",
+  MG: "Minas Gerais",
+  PA: "Pará",
+  PB: "Paraíba",
+  PR: "Paraná",
+  PE: "Pernambuco",
+  PI: "Piauí",
+  RJ: "Rio de Janeiro",
+  RN: "Rio Grande do Norte",
+  RS: "Rio Grande do Sul",
+  RO: "Rondônia",
+  RR: "Roraima",
+  SC: "Santa Catarina",
+  SP: "São Paulo",
+  SE: "Sergipe",
+  TO: "Tocantins",
+};
 
 export default function OccurrenceModal({
   isOpen,
@@ -88,23 +88,41 @@ export default function OccurrenceModal({
   const [form, setForm] = useState<Occurrence>(emptyForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const ESTADO_NOME_PARA_SIGLA: Record<string, string> =
+  Object.fromEntries(
+    Object.entries(ESTADO_SIGLA_PARA_NOME).map(([sigla, nome]) => [
+      nome,
+      sigla,
+    ])
+  );
+
   useEffect(() => {
-    if (editingOccurrence) {
-      // Se está editando, recalcula o tracking baseado na data atual
-      const updatedOccurrence = { ...editingOccurrence };
-      if (editingOccurrence.dataOcorrencia) {
-        const dias = calculateDaysSinceOccurrence(
-          editingOccurrence.dataOcorrencia
-        );
-        updatedOccurrence.tracking =
-          dias > 0 ? `${dias} ${dias === 1 ? "dia" : "dias"}` : "";
-      }
-      setForm(updatedOccurrence);
-    } else {
-      setForm(emptyForm);
+  if (editingOccurrence) {
+    const updatedOccurrence = { ...editingOccurrence };
+
+    // 🔁 converte nome do estado para sigla
+    if (editingOccurrence.estado) {
+      updatedOccurrence.estado =
+        ESTADO_NOME_PARA_SIGLA[editingOccurrence.estado] ||
+        editingOccurrence.estado;
     }
-    setErrors({});
-  }, [editingOccurrence, isOpen]);
+
+    if (editingOccurrence.dataOcorrencia) {
+      const dias = calculateDaysSinceOccurrence(
+        editingOccurrence.dataOcorrencia
+      );
+      updatedOccurrence.tracking =
+        dias > 0 ? `${dias} ${dias === 1 ? "dia" : "dias"}` : "";
+    }
+
+    setForm(updatedOccurrence);
+  } else {
+    setForm(emptyForm);
+  }
+
+  setErrors({});
+}, [editingOccurrence, isOpen]);
+
 
   const calculateDaysSinceOccurrence = (dataOcorrencia: string): number => {
     if (!dataOcorrencia) return 0;
@@ -186,14 +204,37 @@ export default function OccurrenceModal({
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (validateForm()) {
-      onSubmit(form);
-      setForm(emptyForm);
-      setErrors({});
-    }
-  };
+  if (!validateForm()) return;
+
+  const estadoNome =
+    ESTADO_SIGLA_PARA_NOME[form.estado] || form.estado;
+
+  // 🔹 REGRA DA COLUNA T (STATUS DO EXCEL)
+  const statusExcelValue =
+    ["RESOLVIDO", "FALTA DE PROVAS"].includes(
+      form.statusCliente?.toUpperCase()
+    ) &&
+    ["RESOLVIDO", "FALTA DE PROVAS"].includes(
+      form.statusTransportadora?.toUpperCase()
+    )
+      ? "OK"
+      : "";
+
+  onSubmit({
+    ...form,
+    estado: estadoNome,
+    status: statusExcelValue, // 👈 ISSO VAI PARA A COLUNA T
+  });
+
+  setForm(emptyForm);
+  setErrors({});
+
+
+  onClose();
+};
+
 
   if (!isOpen) return null;
 
@@ -473,11 +514,12 @@ export default function OccurrenceModal({
                   onChange={updateField}
                   className="bg-input-bg border border-input-border text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all"
                 >
-                  {ESTADOS_BRASILEIROS.map((estado) => (
-                    <option key={estado.value} value={estado.value}>
-                      {estado.label}
+                    <option value="">Selecione...</option>
+                    {Object.entries(ESTADO_SIGLA_PARA_NOME).map(([sigla, nome]) => (
+                    <option key={sigla} value={sigla}>
+                      {nome}
                     </option>
-                  ))}
+                    ))}
                 </select>
               </div>
             </div>
@@ -490,7 +532,7 @@ export default function OccurrenceModal({
               Status e Rastreamento
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
+             {/*  <div>
                 <label className="block text-sm font-medium text-text-primary mb-2">
                   Status Inicial
                 </label>
@@ -500,16 +542,15 @@ export default function OccurrenceModal({
                   onChange={updateField}
                   className="bg-input-bg border border-input-border text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all"
                 >
-                  <option value="Em analise">Em análise</option>
+                  <option value="">Em análise</option>
+                  <option value="Resolvido">
+                    Resolvido
+                  </option>
                   <option value="Pendencia comercial">
                     Pendência comercial
                   </option>
-                  <option value="Ocorrencia finalizada">
-                    Ocorrência finalizada
-                  </option>
-                  <option value="Cancelado">Cancelado</option>
                 </select>
-              </div>
+              </div> */}
 
               <div>
                 <label className="block text-sm font-medium text-text-primary mb-2">
@@ -522,9 +563,8 @@ export default function OccurrenceModal({
                   className="bg-input-bg border border-input-border text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all"
                 >
                   <option value="">Selecione...</option>
-                  <option value="Pendente">Pendente</option>
-                  <option value="Em Andamento">Em Andamento</option>
-                  <option value="Resolvido">Resolvido</option>
+                  <option value="EM ABERTO">Pendente</option>
+                  <option value="RESOLVIDO">Resolvido</option>
                   <option value="Falta de provas">Falta de provas</option>
                 </select>
               </div>
@@ -540,9 +580,8 @@ export default function OccurrenceModal({
                   className="bg-input-bg border border-input-border text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all"
                 >
                   <option value="">Selecione...</option>
-                  <option value="Pendente">Pendente</option>
-                  <option value="Em Andamento">Em Andamento</option>
-                  <option value="Resolvido">Resolvido</option>
+                   <option value="EM ABERTO">Pendente</option>
+                  <option value="RESOLVIDO">Resolvido</option>
                   <option value="Falta de provas">Falta de provas</option>
                 </select>
               </div>
