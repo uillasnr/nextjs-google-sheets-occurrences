@@ -78,7 +78,7 @@ function StatCard({
   return (
     <button
       onClick={onClick}
-      className={`bg-white rounded-xl shadow-sm border p-4 text-left transition
+      className={`bg-white dark:bg-gray-800 dark:text-white rounded-xl shadow-sm border p-4 text-left transition
         ${
           active
             ? "border-blue-600 ring-2 ring-blue-200"
@@ -87,7 +87,7 @@ function StatCard({
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-slate-600 font-medium">{label}</p>
+          <p className="text-sm dark:text-white font-medium">{label}</p>
           <p className={`text-2xl font-bold mt-1 ${iconColor}`}>{value}</p>
         </div>
 
