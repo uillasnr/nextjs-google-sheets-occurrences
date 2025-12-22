@@ -5,6 +5,7 @@ module.exports = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class', // ativa dark mode via classe .dark
   theme: {
     extend: {
       colors: {
@@ -51,14 +52,14 @@ module.exports = {
         },
       },
       boxShadow: {
-        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)',
+        card: '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)',
         'card-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3)',
-        'input': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.3)',
-        'glow': '0 0 20px rgba(45, 212, 191, 0.3)',
+        input: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.3)',
+        glow: '0 0 20px rgba(45, 212, 191, 0.3)',
       },
       borderRadius: {
-        'card': '12px',
-        'input': '8px',
+        card: '12px',
+        input: '8px',
       },
     },
   },
