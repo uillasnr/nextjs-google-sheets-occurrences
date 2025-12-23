@@ -1,15 +1,21 @@
 "use client";
 
-import { Truck, Building2, Plus } from "lucide-react";
+import { Truck, Building2, Plus, BarChart3 } from "lucide-react";
 import dynamic from "next/dynamic";
 
 interface HeaderProps {
   sheet: "SP" | "PE" | "ES";
   setSheet: (sheet: "SP" | "PE" | "ES") => void;
   onNew: () => void;
+  onToggleDashboard: () => void;
 }
 
-export default function Header({ sheet, setSheet, onNew }: HeaderProps) {
+export default function Header({
+  sheet,
+  setSheet,
+  onNew,
+  onToggleDashboard,
+}: HeaderProps) {
   const ThemeToggle = dynamic(
     () => import("./ThemeToggle").then((mod) => mod.ThemeToggle),
     {
@@ -44,6 +50,16 @@ export default function Header({ sheet, setSheet, onNew }: HeaderProps) {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 justify-end w-full sm:w-auto">
+            <button
+              onClick={onToggleDashboard}
+              className="flex items-center gap-2 border border-gray-300 dark:text-white bg-gray-200 dark:bg-gray-800
+   hover:bg-gray-300 dark:hover:bg-gray-700
+   px-4 py-2 rounded-lg transition-colors shadow-md text-sm"
+            >
+              <BarChart3 className="w-5 h-5" />
+              Dashboard
+            </button>
+
             <div suppressHydrationWarning>
               <ThemeToggle />
             </div>
