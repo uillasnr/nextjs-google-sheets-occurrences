@@ -1,3 +1,5 @@
+import { Occurrence, TIPO_OCORRENCIA_MAP } from "@/types/occurrence";
+
 // ================= STATUS =================
 export type StatusCanonico =
   | "RESOLVIDO"
@@ -82,3 +84,57 @@ export function isValidId(id: any): boolean {
   if (!id) return false;
   return String(id).trim().toUpperCase() !== "ID";
 }
+
+
+export function groupOccurrencesByMonth(
+  occurrences: { dataOcorrencia?: string }[]
+) {
+  const months = [
+    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+    "Jul", "Ago", "Set", "Out", "Nov", "Dez",
+  ]
+
+  // inicia todos os meses com zero
+  const result = months.map((month) => ({
+    month,
+    total: 0,
+  }))
+
+  occurrences.forEach((item) => {
+    if (!item.dataOcorrencia) return
+
+    const date = new Date(item.dataOcorrencia)
+    if (isNaN(date.getTime())) return
+
+    const monthIndex = date.getMonth()
+    result[monthIndex].total += 1
+  })
+
+  return result
+}
+
+
+// 🔧 CORRIGIDO: Converte números para nomes legíveis usando TIPO_OCORRENCIA_MAP
+export function groupOccurrencesByType(occurrences: Occurrence[]) {
+  const map: Record<string, number> = {}
+
+  occurrences.forEach((o) => {
+    if (!o.tipo) return
+
+    const tipoOriginal = String(o.tipo).trim()
+    
+    // ✅ Converte número para nome legível, ou usa o valor original
+    const tipoLegivel = TIPO_OCORRENCIA_MAP[tipoOriginal] || tipoOriginal
+
+    map[tipoLegivel] = (map[tipoLegivel] || 0) + 1
+  })
+
+  // Retorna array de objetos com 'type' e 'count'
+  return Object.entries(map)
+    .map(([type, count]) => ({
+      type,
+      count,
+    }))
+    .sort((a, b) => b.count - a.count) // Ordena do maior para o menor
+}
+
