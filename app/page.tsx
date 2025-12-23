@@ -8,14 +8,22 @@ import Stats from "@/components/Stats";
 import OccurrenceModal from "@/components/OccurrenceModal";
 import Header from "@/components/Header";
 import Loading from "@/components/Loading";
+import { Dashboard } from "./components/dashboard";
+// ✅ CORRETO: Importar o componente Dashboard (não o MonthlyTrendChart)
+
 
 export default function Home() {
   const [list, setList] = useState<Occurrence[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingOccurrence, setEditingOccurrence] = useState<Occurrence | null>(null);
+  const [editingOccurrence, setEditingOccurrence] = useState<Occurrence | null>(
+    null
+  );
   const [sheet, setSheet] = useState<"SP" | "PE" | "ES">("SP");
-  const [statusFilter, setStatusFilter] = useState<"Todos" | "Pendente" | "Em Andamento" | "Resolvido">("Todos");
+  const [statusFilter, setStatusFilter] = useState<
+    "Todos" | "Pendente" | "Em Andamento" | "Resolvido"
+  >("Todos");
+  const [showDashboard, setShowDashboard] = useState(false);
 
   const filteredList = list.filter((item) => {
     if (statusFilter === "Todos") return true;
@@ -24,7 +32,7 @@ export default function Home() {
 
   const fetchOccurrences = async () => {
     try {
-      setLoading(true); // Ativa o modal de capacete
+      setLoading(true);
       const response = await fetch(`/api/occurrences?sheet=${sheet}`);
       if (response.ok) {
         const data = await response.json();
@@ -33,7 +41,7 @@ export default function Home() {
     } catch (error) {
       console.error("Erro ao carregar:", error);
     } finally {
-      setLoading(false); // Fecha o modal
+      setLoading(false);
     }
   };
 
@@ -43,10 +51,10 @@ export default function Home() {
 
   const handleSubmit = async (occurrence: Occurrence) => {
     try {
-      setLoading(true); // Ativa loading ao salvar
+      setLoading(true);
       const method = editingOccurrence?.id ? "PUT" : "POST";
-      const url = editingOccurrence?.id 
-        ? `/api/occurrences/${occurrence.id}?sheet=${sheet}` 
+      const url = editingOccurrence?.id
+        ? `/api/occurrences/${occurrence.id}?sheet=${sheet}`
         : `/api/occurrences?sheet=${sheet}`;
 
       const response = await fetch(url, {
@@ -68,9 +76,8 @@ export default function Home() {
   };
 
   const handleDelete = async (id: string) => {
-    
     try {
-      setLoading(true); // Ativa loading ao deletar
+      setLoading(true);
       const response = await fetch(`/api/occurrences/${id}?sheet=${sheet}`, {
         method: "DELETE",
       });
@@ -96,50 +103,56 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors pt-[130px]">
-      {/* O Loading agora é um modal que aparece sobre o componente Home */}
       <Loading isOpen={loading} />
 
       <Header
         sheet={sheet}
         setSheet={setSheet}
         onNew={handleNew}
+        onToggleDashboard={() => setShowDashboard((prev) => !prev)}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-6">
-        <Stats
-          list={list}
-          activeFilter={statusFilter}
-          onFilterChange={setStatusFilter}
-        />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredList.length > 0 ? (
-            filteredList.map((item) => (
-              <OccurrenceCard
-                key={item.id}
-                item={item}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ))
-          ) : (
-            !loading && (
-              <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border p-12 text-center col-span-full transition-colors">
-                <div className="bg-gray-100 dark:bg-gray-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Package className="w-10 h-10 text-gray-600 dark:text-gray-400" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                  Nenhuma ocorrência encontrada
-                </h3>
-              </div>
-            )
-          )}
+      {showDashboard ? (
+        // 👉 DASHBOARD
+        <div className="px-4 mt-15 sm:px-6">
+          <Dashboard selectedBranch={sheet} occurrences={list} />
         </div>
-      </div>
+      ) : (
+        // 👉 LISTA NORMAL
+        <>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-6">
+            <Stats
+              list={list}
+              activeFilter={statusFilter}
+              onFilterChange={setStatusFilter}
+            />
+          </div>
 
-      
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredList.length > 0
+                ? filteredList.map((item) => (
+                    <OccurrenceCard
+                      key={item.id}
+                      item={item}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                    />
+                  ))
+                : !loading && (
+                    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border p-12 text-center col-span-full transition-colors">
+                      <div className="bg-gray-100 dark:bg-gray-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Package className="w-10 h-10 text-gray-600 dark:text-gray-400" />
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                        Nenhuma ocorrência encontrada
+                      </h3>
+                    </div>
+                  )}
+            </div>
+          </div>
+        </>
+      )}
 
       <OccurrenceModal
         isOpen={isModalOpen}
@@ -152,7 +165,5 @@ export default function Home() {
         sheet={sheet}
       />
     </div>
-
-    
   );
 }
