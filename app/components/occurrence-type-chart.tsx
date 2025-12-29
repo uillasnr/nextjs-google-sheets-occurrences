@@ -8,28 +8,29 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  Cell,
+  Legend,
 } from "recharts";
-import type { Occurrence } from "@/types/occurrence";
-import { groupOccurrencesByType } from "../services/googleSheets/helpers";
 import { CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartContainer } from "@/components/ui/chart";
 
 interface Props {
-  occurrences: Occurrence[];
+  data: any[];
+  year: number;
 }
 
-export function OccurrenceTypeChart({ occurrences }: Props) {
-  const data = groupOccurrencesByType(occurrences);
+const TYPE_COLORS = [
+  "oklch(0.65 0.24 264)", // azul principal (destaque)
+  "oklch(0.62 0.20 258)", // azul médio
+  "oklch(0.60 0.16 252)", // azul suave
+  "oklch(0.58 0.14 246)", // azul mais fechado
+  "oklch(0.56 0.12 240)", // azul acinzentado
+  "oklch(0.54 0.08 234)", // quase cinza azulado
+];
 
+export function OccurrenceTypeChart({ data, year }: Props) {
   console.log("OccurrenceTypeChart data:", data);
-  console.log("Total occurrences:", occurrences.length);
-  console.log(
-    "Sample tipos:",
-    occurrences.slice(0, 5).map((o) => o.tipo)
-  );
 
-  // Caso não tenha dados
-  if (data.length === 0) {
+  if (!data || data.length === 0) {
     return (
       <div className="flex h-[300px] items-center justify-center text-gray-500 dark:text-gray-400">
         <p>Nenhum dado disponível</p>
@@ -37,33 +38,99 @@ export function OccurrenceTypeChart({ occurrences }: Props) {
     );
   }
 
+  // 🔹 Descobre todos os tipos
+  const types = Array.from(
+    new Set(
+      data.flatMap((item) => Object.keys(item).filter((key) => key !== "month"))
+    )
+  );
+
   return (
     <div>
-      {" "}
+      <p className="text-sm text-gray-600 dark:text-gray-400">{year}</p>
       <CardHeader>
         <CardTitle className="dark:text-gray-100">
-          Ocorrências por Tipo
+          Ocorrências por tipo
         </CardTitle>
       </CardHeader>
+
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.25 0.012 240)" />
-          <XAxis dataKey="type" stroke="oklch(0.55 0.015 240)" fontSize={12} />
-          <YAxis stroke="oklch(0.55 0.015 240)" fontSize={12} />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "oklch(0.15 0.008 240)",
-              border: "1px solid oklch(0.25 0.012 240)",
-              borderRadius: "0.5rem",
-              color: "oklch(0.95 0.005 240)",
-            }}
-          />
-          <Bar
-            dataKey="count"
-            fill="oklch(0.65 0.24 264)"
-            radius={[4, 4, 0, 0]}
-          />
-        </BarChart>
+        <ChartContainer config={{}}>
+          <BarChart
+            data={data}
+            barGap={12} // 👈 espaço ENTRE barras do mesmo mês
+            barCategoryGap="10%" // 👈 espaço ENTRE os meses
+          >
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="oklch(0.25 0.012 240)"
+            />
+
+            <XAxis
+              dataKey="month"
+              stroke="oklch(0.55 0.015 240)"
+              fontSize={12}
+            />
+
+            <YAxis stroke="oklch(0.55 0.015 240)" fontSize={12} />
+
+            <Tooltip
+              cursor={{ fill: "oklch(0.55 0.015 240)" }}
+              content={({ active, payload, label }) => {
+                if (!active || !payload || !payload.length) return null;
+
+                return (
+                  <div
+                    className="
+                      w-64
+                      rounded-xl
+                      border
+                      border-gray-200 dark:border-white/10
+                      bg-white/95 dark:bg-gray-900/95
+                      backdrop-blur-md
+                      p-4
+                      shadow-xl
+                      text-gray-900 dark:text-gray-100
+                    "
+                  >
+                    <p className="text-sm font-semibold mb-2">{label}</p>
+
+                    <div className="space-y-1">
+                      {payload.map((item: any) => (
+                        <div
+                          key={item.dataKey}
+                          className="flex justify-between text-sm"
+                        >
+                          <span className="text-gray-600 dark:text-gray-300">
+                            {item.dataKey}
+                          </span>
+                          <span className="font-semibold">{item.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }}
+            />
+
+            <Legend />
+
+            {types.map((type, index) => (
+              <Bar
+                key={type}
+                dataKey={type}
+                barSize={6}
+                maxBarSize={8}
+                radius={[8, 8, 8, 8]}
+                fill={TYPE_COLORS[index % TYPE_COLORS.length]}
+                opacity={0.95}
+                isAnimationActive
+                animationDuration={600}
+                animationEasing="ease-out"
+              />
+            ))}
+          </BarChart>
+        </ChartContainer>
       </ResponsiveContainer>
     </div>
   );
