@@ -2,14 +2,9 @@ import { randomUUID } from "crypto";
 import type { Occurrence } from "@/types/occurrence";
 import { sheets, SPREADSHEET_ID } from "./auth";
 import { COLUMN_MAP } from "./columnMap";
-import {
-  excelDateToISO,
-  isValidId,
-  normalizarStatus,
-} from "./helpers";
+import { excelDateToISO, isValidId, normalizarStatus } from "./helpers";
 
 export class GoogleSheetsService {
-
   // ================= GET =================
   static async getOccurrences(sheetName: string): Promise<Occurrence[]> {
     const res = await sheets.spreadsheets.values.get({
@@ -20,8 +15,8 @@ export class GoogleSheetsService {
     const rows = res.data.values || [];
 
     return rows
-      .filter(row => isValidId(row[0]))
-      .map(row => ({
+      .filter((row) => isValidId(row[0]))
+      .map((row) => ({
         id: row[0],
         nota: row[1],
         volumes: row[2] || "",
@@ -41,12 +36,7 @@ export class GoogleSheetsService {
         tracking: row[16] || "",
         obs: row[17] || "",
         pendencia: row[18] || "",
-        status: normalizarStatus(
-          row[19],
-          row[19],
-          row[14],
-          row[15]
-        ),
+        status: normalizarStatus(row[19], row[19], row[14], row[15]),
       }));
   }
 
@@ -54,15 +44,13 @@ export class GoogleSheetsService {
   static async createOccurrence(sheet: string, data: Occurrence) {
     const id = randomUUID();
 
-    const row = COLUMN_MAP.map(
-      col => (col === "id" ? id : data[col] ?? "")
-      
-    );
+    const row = COLUMN_MAP.map((col) => (col === "id" ? id : data[col] ?? ""));
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
       range: `'${sheet}'!A:Z`,
       valueInputOption: "RAW",
+      insertDataOption: "INSERT_ROWS", // ✅ ESSENCIAL
       requestBody: { values: [row] },
     });
 
@@ -77,14 +65,14 @@ export class GoogleSheetsService {
     });
 
     const rows = res.data.values || [];
-    const index = rows.findIndex(r => r[0] === id);
+    const index = rows.findIndex((r) => r[0] === id);
 
     if (index === -1) throw new Error("ID não encontrado");
 
     const rowNumber = index + 1;
 
-    const updatedRow = COLUMN_MAP.map(
-      col => (col === "id" ? id : data[col] ?? "")
+    const updatedRow = COLUMN_MAP.map((col) =>
+      col === "id" ? id : data[col] ?? ""
     );
 
     await sheets.spreadsheets.values.update({
@@ -96,63 +84,62 @@ export class GoogleSheetsService {
   }
 
   // ================= DELETE =================
-static async deleteOccurrence(id: string, sheetName: string) {
-  // 1️⃣ Buscar os valores da planilha
-  const response = await sheets.spreadsheets.values.get({
-    spreadsheetId: SPREADSHEET_ID,
-    range: `${sheetName}!A:Z`,
-  });
+  static async deleteOccurrence(id: string, sheetName: string) {
+    // 1️⃣ Buscar os valores da planilha
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${sheetName}!A:Z`,
+    });
 
-  const rows = response.data.values || [];
+    const rows = response.data.values || [];
 
-  // 2️⃣ Descobrir o índice da linha pelo ID
-  let rowIndex = -1;
+    // 2️⃣ Descobrir o índice da linha pelo ID
+    let rowIndex = -1;
 
-  for (let i = 1; i < rows.length; i++) { // pula o header
-    if (rows[i][0] === id) {
-      rowIndex = i;
-      break;
+    for (let i = 1; i < rows.length; i++) {
+      // pula o header
+      if (rows[i][0] === id) {
+        rowIndex = i;
+        break;
+      }
     }
-  }
 
-  if (rowIndex === -1) {
-    throw new Error("ID não encontrado");
-  }
+    if (rowIndex === -1) {
+      throw new Error("ID não encontrado");
+    }
 
-  // 3️⃣ Buscar o sheetId numérico
-  const sheetMeta = await sheets.spreadsheets.get({
-    spreadsheetId: SPREADSHEET_ID,
-  });
+    // 3️⃣ Buscar o sheetId numérico
+    const sheetMeta = await sheets.spreadsheets.get({
+      spreadsheetId: SPREADSHEET_ID,
+    });
 
-  const sheet = sheetMeta.data.sheets?.find(
-    s => s.properties?.title === sheetName
-  );
+    const sheet = sheetMeta.data.sheets?.find(
+      (s) => s.properties?.title === sheetName
+    );
 
-  if (!sheet || sheet.properties?.sheetId == null) {
-    throw new Error("Aba não encontrada");
-  }
+    if (!sheet || sheet.properties?.sheetId == null) {
+      throw new Error("Aba não encontrada");
+    }
 
-  const sheetId = sheet.properties.sheetId;
+    const sheetId = sheet.properties.sheetId;
 
-  // 4️⃣ Deletar a linha
-  await sheets.spreadsheets.batchUpdate({
-    spreadsheetId: SPREADSHEET_ID,
-    requestBody: {
-      requests: [
-        {
-          deleteDimension: {
-            range: {
-              sheetId,
-              dimension: "ROWS",
-              startIndex: rowIndex,
-              endIndex: rowIndex + 1,
+    // 4️⃣ Deletar a linha
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId: SPREADSHEET_ID,
+      requestBody: {
+        requests: [
+          {
+            deleteDimension: {
+              range: {
+                sheetId,
+                dimension: "ROWS",
+                startIndex: rowIndex,
+                endIndex: rowIndex + 1,
+              },
             },
           },
-        },
-      ],
-    },
-  });
-}
-
-
+        ],
+      },
+    });
+  }
 }
