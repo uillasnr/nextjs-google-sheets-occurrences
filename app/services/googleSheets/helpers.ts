@@ -85,56 +85,142 @@ export function isValidId(id: any): boolean {
   return String(id).trim().toUpperCase() !== "ID";
 }
 
+export function getAvailableYears(
+  occurrences: { dataNota?: string }[]
+): number[] {
+  const years = new Set<number>()
+
+  occurrences.forEach(item => {
+    if (!item.dataNota) return
+
+    const year = extractYearFromDate(item.dataNota)
+    if (year) years.add(year)
+  })
+
+  return Array.from(years).sort((a, b) => b - a)
+}
+
+
+function extractYearFromDate(date: string): number | null {
+  // ISO → YYYY-MM-DD
+  if (date.includes("-")) {
+    const parts = date.split("-")
+    if (parts.length !== 3) return null
+    return Number(parts[0]) // ano
+  }
+
+  // BR → DD/MM/YYYY
+  if (date.includes("/")) {
+    const parts = date.split("/")
+    if (parts.length !== 3) return null
+    return Number(parts[2]) // ano
+  }
+
+  return null
+}
+
+
+function extractMonthFromDate(date: string): number | null {
+  // ISO → YYYY-MM-DD
+  if (date.includes("-")) {
+    const parts = date.split("-")
+    if (parts.length !== 3) return null
+    return Number(parts[1]) // mês
+  }
+
+  // BR → DD/MM/YYYY
+  if (date.includes("/")) {
+    const parts = date.split("/")
+    if (parts.length !== 3) return null
+    return Number(parts[1]) // mês
+  }
+
+  return null
+}
+
+
 
 export function groupOccurrencesByMonth(
-  occurrences: { dataOcorrencia?: string }[]
+  occurrences: { dataNota?: string; nota?: string }[],
+  year?: number
 ) {
   const months = [
     "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
     "Jul", "Ago", "Set", "Out", "Nov", "Dez",
   ]
 
-  // inicia todos os meses com zero
-  const result = months.map((month) => ({
+  const result = months.map(month => ({
     month,
     total: 0,
+    notas: [] as string[], // ✅ lista de notas do mês
   }))
 
-  occurrences.forEach((item) => {
-    if (!item.dataOcorrencia) return
+  occurrences.forEach(item => {
+    if (!item.dataNota) return
 
-    const date = new Date(item.dataOcorrencia)
-    if (isNaN(date.getTime())) return
+    const month = extractMonthFromDate(item.dataNota)
+    const itemYear = extractYearFromDate(item.dataNota)
 
-    const monthIndex = date.getMonth()
-    result[monthIndex].total += 1
+    if (!month || !itemYear) return
+    if (year && itemYear !== year) return
+
+    const index = month - 1
+
+    result[index].total += 1
+
+    // ✅ adiciona a nota
+    if (item.nota) {
+      result[index].notas.push(item.nota)
+    }
   })
 
   return result
 }
 
+/* export function getAllTypes(occurrences: Occurrence[]) {
+  const set = new Set<string>()
 
-// 🔧 CORRIGIDO: Converte números para nomes legíveis usando TIPO_OCORRENCIA_MAP
-export function groupOccurrencesByType(occurrences: Occurrence[]) {
-  const map: Record<string, number> = {}
-
-  occurrences.forEach((o) => {
+  occurrences.forEach(o => {
     if (!o.tipo) return
-
-    const tipoOriginal = String(o.tipo).trim()
-    
-    // ✅ Converte número para nome legível, ou usa o valor original
-    const tipoLegivel = TIPO_OCORRENCIA_MAP[tipoOriginal] || tipoOriginal
-
-    map[tipoLegivel] = (map[tipoLegivel] || 0) + 1
+    const tipo =
+      TIPO_OCORRENCIA_MAP[o.tipo] || o.tipo
+    set.add(tipo)
   })
 
-  // Retorna array de objetos com 'type' e 'count'
-  return Object.entries(map)
-    .map(([type, count]) => ({
-      type,
-      count,
-    }))
-    .sort((a, b) => b.count - a.count) // Ordena do maior para o menor
+  return Array.from(set)
+}
+ */
+
+// 🔧 CORRIGIDO: Converte números para nomes legíveis usando TIPO_OCORRENCIA_MAP
+export function groupOccurrencesByType(occurrences: Occurrence[],
+  year?: number) {
+
+   const months = [
+    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+    "Jul", "Ago", "Set", "Out", "Nov", "Dez",
+  ]
+
+  const result = months.map(month => ({ month }))
+
+  occurrences.forEach(o => {
+    if (!o.dataNota || !o.tipo) return
+
+    const monthIndex = extractMonthFromDate(o.dataNota)
+    const itemYear = extractYearFromDate(o.dataNota)
+
+    if (!monthIndex || !itemYear) return
+    if (year && itemYear !== year) return
+
+    // 🔹 AQUI está o ponto-chave
+    const tipoLegivel =
+      TIPO_OCORRENCIA_MAP[o.tipo] || o.tipo
+
+    const row = result[monthIndex - 1]
+
+    ;(row as any)[tipoLegivel] =
+      ((row as any)[tipoLegivel] || 0) + 1
+  })
+
+  return result
 }
 
