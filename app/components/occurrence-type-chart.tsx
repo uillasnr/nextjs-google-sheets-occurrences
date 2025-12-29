@@ -19,12 +19,13 @@ interface Props {
 }
 
 const TYPE_COLORS = [
-  "oklch(0.65 0.24 264)", // azul principal (destaque)
-  "oklch(0.62 0.20 258)", // azul médio
-  "oklch(0.60 0.16 252)", // azul suave
-  "oklch(0.58 0.14 246)", // azul mais fechado
-  "oklch(0.56 0.12 240)", // azul acinzentado
-  "oklch(0.54 0.08 234)", // quase cinza azulado
+  "oklch(63.4% 0.400 157.2)",
+  "oklch(0.65 0.24 264)",
+  "oklch(73.3% 0.000 86.7)",
+  "oklch(43.1% 0.400 64.2)",
+  "oklch(64.7% 0.211 81.6)",
+  "oklch(44.1% 0.018 186.8)",
+  "oklch(0.54 0.08 234)",
 ];
 
 export function OccurrenceTypeChart({ data, year }: Props) {
