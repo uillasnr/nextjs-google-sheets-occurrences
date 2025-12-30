@@ -177,21 +177,6 @@ export function groupOccurrencesByMonth(
   return result
 }
 
-/* export function getAllTypes(occurrences: Occurrence[]) {
-  const set = new Set<string>()
-
-  occurrences.forEach(o => {
-    if (!o.tipo) return
-    const tipo =
-      TIPO_OCORRENCIA_MAP[o.tipo] || o.tipo
-    set.add(tipo)
-  })
-
-  return Array.from(set)
-}
- */
-
-// 🔧 CORRIGIDO: Converte números para nomes legíveis usando TIPO_OCORRENCIA_MAP
 export function groupOccurrencesByType(occurrences: Occurrence[],
   year?: number) {
 
@@ -224,3 +209,45 @@ export function groupOccurrencesByType(occurrences: Occurrence[],
   return result
 }
 
+
+export function groupOccurrencesByTransportadora(
+  occurrences: Occurrence[],
+  year?: number
+) {
+ 
+   const months = [
+    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+    "Jul", "Ago", "Set", "Out", "Nov", "Dez",
+  ]
+
+  const result = months.map(month => ({
+    month,
+    transportadoras: {} as Record<string, Record<string, number>>
+  }))
+
+  occurrences.forEach(o => {
+    if (!o.dataNota || !o.tipo || !o.transportadora) return
+
+    const monthIndex = extractMonthFromDate(o.dataNota)
+    const itemYear = extractYearFromDate(o.dataNota)
+
+    if (!monthIndex || !itemYear) return
+    if (year && itemYear !== year) return
+
+    const tipoLegivel =
+      TIPO_OCORRENCIA_MAP[o.tipo] || o.tipo
+
+    const row = result[monthIndex - 1]
+
+    // 🔹 cria transportadora se não existir
+    if (!row.transportadoras[o.transportadora]) {
+      row.transportadoras[o.transportadora] = {}
+    }
+
+    // 🔹 soma por tipo
+    row.transportadoras[o.transportadora][tipoLegivel] =
+      (row.transportadoras[o.transportadora][tipoLegivel] || 0) + 1
+  })
+
+  return result
+}

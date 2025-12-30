@@ -7,8 +7,10 @@ import type { Occurrence } from "@/types/occurrence";
 import { useState } from "react";
 import {
   getAvailableYears,
+  groupOccurrencesByTransportadora,
   groupOccurrencesByType,
 } from "../services/googleSheets/helpers";
+import { OccurrenceTypeByTransportadoraChart } from "./occurrence-type-by-transportadora-chart";
 
 interface DashboardProps {
   selectedBranch: "SP" | "PE" | "ES";
@@ -22,11 +24,15 @@ export function Dashboard({ selectedBranch, occurrences }: DashboardProps) {
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
 
   const typeByMonthData = groupOccurrencesByType(occurrences, selectedYear);
+  const byTransportadoraData = groupOccurrencesByTransportadora(
+    occurrences,
+    selectedYear
+  );
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto px-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
             Dashboard
@@ -36,36 +42,47 @@ export function Dashboard({ selectedBranch, occurrences }: DashboardProps) {
           </p>
         </div>
 
-        {/* 🎯 SELECT DE ANO */}
+        {/* Select de ano */}
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(Number(e.target.value))}
-          className="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
+          className="w-fit rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
         >
           {years.map((year) => (
-            <option
-              className="text-gray-900 dark:text-gray-100"
-              key={year}
-              value={year}
-            >
+            <option key={year} value={year}>
               {year}
             </option>
           ))}
         </select>
       </div>
 
-      {/* Grid ÚNICO para os dois gráficos */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Gráfico 1 */}
-        <Card className="border border-gray-300 dark:border-gray-600 rounded-lg p-6">
+      {/* Gráficos 1 e 2 */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 justify-items-center">
+        <Card className="w-full lg:max-w-3xl border border-gray-300 dark:border-gray-600 rounded-lg p-6">
           <MonthlyTrendChart occurrences={occurrences} year={selectedYear} />
         </Card>
 
-        {/* Gráfico 2 */}
-        <Card className="border border-gray-300 dark:border-gray-600 rounded-lg p-6">
+        <Card className="w-full lg:max-w-3xl border border-gray-300 dark:border-gray-600 rounded-lg p-6">
           <OccurrenceTypeChart data={typeByMonthData} year={selectedYear} />
         </Card>
       </div>
+
+      {/* Gráfico 3 centralizado */}
+      <div className="flex justify-center pb-10">
+        <Card className="w-full lg:max-w-6xl border border-gray-300 dark:border-gray-600 rounded-lg p-6">
+          <OccurrenceTypeByTransportadoraChart
+            data={byTransportadoraData}
+            year={selectedYear}
+          />
+        </Card>
+      </div>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-200 dark:border-gray-700 py-4 text-center">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          © {new Date().getFullYear()} • Dashboard de Ocorrências
+        </p>
+      </footer>
     </div>
   );
 }
