@@ -11,7 +11,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ goToHome, goToDashboard }: SidebarProps) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleSearch = (nfNumber: string) => {
