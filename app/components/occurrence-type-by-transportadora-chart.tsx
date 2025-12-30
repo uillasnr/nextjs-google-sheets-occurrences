@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import { CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
+import { useState } from "react";
 
 interface Props {
   data: any[];
@@ -29,6 +30,8 @@ const TYPE_COLORS = [
 ];
 
 export function OccurrenceTypeByTransportadoraChart({ data, year }: Props) {
+  const [tooltipData, setTooltipData] = useState<any>(null);
+
   console.log("transportadoras", data);
 
   if (!data || data.length === 0) {
@@ -112,6 +115,7 @@ export function OccurrenceTypeByTransportadoraChart({ data, year }: Props) {
             <YAxis stroke="oklch(0.55 0.015 240)" fontSize={12} />
 
             <Tooltip
+              wrapperStyle={{ pointerEvents: "auto" }}
               cursor={{ fill: "oklch(0.55 0.015 240)" }}
               content={({ active, payload }) => {
                 if (!active || !payload || !payload.length) return null;
@@ -134,7 +138,7 @@ export function OccurrenceTypeByTransportadoraChart({ data, year }: Props) {
         "
                   >
                     {/* Header */}
-                    <div className="mb-4 flex items-center justify-between">
+                    <div className="mb-4 flex items-center justify-between  max-h-[300px] ">
                       <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                         {month}
                       </p>
@@ -144,19 +148,22 @@ export function OccurrenceTypeByTransportadoraChart({ data, year }: Props) {
                     </div>
 
                     {/* Transportadoras */}
-                    <div className="space-y-4">
+                    <div
+                      className="space-y-4 max-h-[300px] overflow-auto"
+                      onWheel={(e) => e.stopPropagation()}
+                    >
                       {Object.entries(transportadoras).map(
                         ([transportadora, tipos]: any) => (
                           <div
                             key={transportadora}
                             className="
                   rounded-xl border border-gray-100 dark:border-white/10
-                  bg-gray-50/60 dark:bg-white/5
-                  p-3
+                  bg-gray-50/60 dark:bg-white/5 ml-3
+                  p-3 m-3
                 "
                           >
                             {/* Nome transportadora */}
-                            <div className="mb-2 flex items-center gap-2">
+                            <div className="mb-2 flex items-center gap-2 ">
                               <span
                                 className="h-3 w-3 rounded-sm"
                                 style={{
@@ -219,6 +226,12 @@ export function OccurrenceTypeByTransportadoraChart({ data, year }: Props) {
                 fill={TYPE_COLORS[index % TYPE_COLORS.length]}
                 barSize={20}
                 radius={[4, 4, 0, 0]}
+                onMouseMove={(state) => {
+                  if (state?.activePayload?.length) {
+                    setTooltipData(state.activePayload[0].payload);
+                  }
+                }}
+                onMouseLeave={() => setTooltipData(null)}
               />
             ))}
           </BarChart>
