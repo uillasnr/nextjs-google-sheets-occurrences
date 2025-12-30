@@ -56,14 +56,6 @@ export default function MonthlyTrendChart({ occurrences, year }: Props) {
             />
             <YAxis stroke="oklch(0.55 0.015 240)" fontSize={12} />
 
-            <Bar
-              dataKey="total"
-              isAnimationActive
-              animationDuration={600}
-              animationEasing="ease-out"
-              fill="oklch(0.65 0.24 264)"
-              radius={8}
-            />
             <Tooltip
               wrapperStyle={{ pointerEvents: "auto" }}
               cursor={{ fill: "oklch(0.55 0.015 240)" }}
@@ -147,6 +139,14 @@ export default function MonthlyTrendChart({ occurrences, year }: Props) {
                   </div>
                 );
               }}
+            />
+            <Bar
+              dataKey="total"
+              isAnimationActive
+              animationDuration={600}
+              animationEasing="ease-out"
+              fill="oklch(0.65 0.24 264)"
+              radius={8}
             />
           </BarChart>
         </ChartContainer>
