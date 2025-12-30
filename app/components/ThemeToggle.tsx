@@ -9,8 +9,10 @@ export function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="flex items-center gap-2 bg-card hover:bg-accent text-foreground px-4 py-2 rounded-lg transition-all duration-200 border border-gray-300 dark:border-gray-600 shadow-sm"
-      aria-label="Alternar tema"
+      className="flex items-center gap-3 px-4 py-3 rounded-lg
+      bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700
+      hover:bg-gray-300 dark:hover:bg-gray-700
+      transition-colors shadow-md text-sm dark:text-white"
     >
       {theme === "dark" ? (
         <>
@@ -21,6 +23,7 @@ export function ThemeToggle() {
           <Moon className="w-5 h-5 text-blue-600" />
         </>
       )}
+      Tema
     </button>
   );
 }
