@@ -11,7 +11,6 @@ import Loading from "@/components/Loading";
 import { Dashboard } from "./components/dashboard";
 // ✅ CORRETO: Importar o componente Dashboard (não o MonthlyTrendChart)
 
-
 export default function Home() {
   const [list, setList] = useState<Occurrence[]>([]);
   const [loading, setLoading] = useState(true);
@@ -109,7 +108,9 @@ export default function Home() {
         sheet={sheet}
         setSheet={setSheet}
         onNew={handleNew}
-        onToggleDashboard={() => setShowDashboard((prev) => !prev)}
+        /*   onToggleDashboard={() => setShowDashboard((prev) => !prev)} */
+        goToHome={() => setShowDashboard(false)}
+        goToDashboard={() => setShowDashboard(true)}
       />
 
       {showDashboard ? (

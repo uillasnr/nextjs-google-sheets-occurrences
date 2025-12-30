@@ -1,28 +1,23 @@
 "use client";
 
-import { Truck, Building2, Plus, BarChart3 } from "lucide-react";
-import dynamic from "next/dynamic";
+import Sidebar from "@/app/components/Sidebar";
+import { Truck, Building2, Plus } from "lucide-react";
 
 interface HeaderProps {
   sheet: "SP" | "PE" | "ES";
   setSheet: (sheet: "SP" | "PE" | "ES") => void;
   onNew: () => void;
-  onToggleDashboard: () => void;
+  goToHome: () => void;
+  goToDashboard: () => void;
 }
 
 export default function Header({
   sheet,
   setSheet,
   onNew,
-  onToggleDashboard,
+  goToHome,
+  goToDashboard,
 }: HeaderProps) {
-  const ThemeToggle = dynamic(
-    () => import("./ThemeToggle").then((mod) => mod.ThemeToggle),
-    {
-      ssr: false,
-    }
-  );
-
   return (
     <div className="fixed top-0 left-0 w-full z-50 bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
@@ -50,19 +45,8 @@ export default function Header({
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 justify-end w-full sm:w-auto">
-            <button
-              onClick={onToggleDashboard}
-              className="flex items-center gap-2 border border-gray-300 dark:text-white bg-gray-200 dark:bg-gray-800
-   hover:bg-gray-300 dark:hover:bg-gray-700
-   px-4 py-2 rounded-lg transition-colors shadow-md text-sm"
-            >
-              <BarChart3 className="w-5 h-5" />
-              Dashboard
-            </button>
-
-            <div suppressHydrationWarning>
-              <ThemeToggle />
-            </div>
+            {/* Sidebar com as funções de navegação */}
+            <Sidebar goToHome={goToHome} goToDashboard={goToDashboard} />
 
             <div className="flex items-center gap-1 sm:gap-3 min-w-[120px]">
               <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground dark:text-gray-100 flex-shrink-0" />
