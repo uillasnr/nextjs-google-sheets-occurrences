@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React, { useEffect } from "react";
 
 interface LoadingProps {
@@ -22,30 +23,25 @@ export default function Loading({ isOpen, text = "Carregando Ocorrências" }: Lo
 
       {/* Conteúdo */}
       <div className="relative z-10 flex flex-col items-center gap-6">
-        {/* Capacete animado */}
-        <div className="relative">
-          <svg
-            viewBox="0 0 24 24"
-            className="w-24 h-24 drop-shadow-[0_0_15px_rgba(33,118,230,0.6)] animate-spin"
-            fill="none"
-            stroke="#2176E6"  // cor azul
-            strokeWidth={1.2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M21 12c0-4.97-4.03-9-9-9s-9 4.03-9 9" />
-            <path d="M4 11c1.5-1 4-1.5 8-1.5s6.5.5 8 1.5l1 3H3l1-3z" fill="#2176E640" /> {/* azul translúcido */}
-            <path d="M21 14v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1" />
-            <path d="M3 14l3 5h12l3-5" />
-            <path d="M12 3v3" className="opacity-40" />
-            <path d="M8 17l1 2" className="opacity-60" />
-            <path d="M16 17l-1 2" className="opacity-60" />
-          </svg>
+        
+        {/* Container do Capacete */}
+        <div className="relative flex flex-col items-center">
+          
+          {/* Capacete com animação de flutuar (bounce suave) */}
+          <div className="animate-bounce-slow">
+            <Image 
+              src={"/capacete web.png"} 
+              alt="Capacete Web" 
+              width={128} 
+              height={128} 
+              className="drop-shadow-[0_10px_15px_rgba(33,118,230,0.3)]"
+            />
+          </div>
 
-          {/* Sombra dinâmica */}
+          {/* Sombra dinâmica que reage à altura do capacete */}
           <div
-            className="absolute bottom-[-24px] left-1/2 transform -translate-x-1/2 h-1.5 w-16 rounded-full blur-md animate-pulse"
-            style={{ backgroundColor: "#2176E666" }} // sombra azul translúcida
+            className="h-1.5 w-16 rounded-full blur-md animate-shadow-pulse mt-4"
+            style={{ backgroundColor: "#2176E666" }} 
           />
         </div>
 
@@ -60,7 +56,7 @@ export default function Loading({ isOpen, text = "Carregando Ocorrências" }: Lo
                 key={i}
                 className="w-1.5 h-1.5 rounded-full animate-bounce"
                 style={{
-                  backgroundColor: "#2176E6", // bolinhas azuis
+                  backgroundColor: "#2176E6",
                   animationDelay: `${-0.15 * (2 - i)}s`,
                 }}
               />
@@ -68,6 +64,24 @@ export default function Loading({ isOpen, text = "Carregando Ocorrências" }: Lo
           </div>
         </div>
       </div>
+
+      {/* Estilos CSS para as animações customizadas */}
+      <style jsx>{`
+        @keyframes bounce-slow {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-15px); }
+        }
+        @keyframes shadow-pulse {
+          0%, 100% { transform: scaleX(1); opacity: 0.6; }
+          50% { transform: scaleX(0.7); opacity: 0.2; }
+        }
+        .animate-bounce-slow {
+          animation: bounce-slow 2s ease-in-out infinite;
+        }
+        .animate-shadow-pulse {
+          animation: shadow-pulse 2s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 }
