@@ -3,13 +3,15 @@
 import { Package } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { Occurrence } from "@/types/occurrence";
-import OccurrenceCard from "@/components/OccurrenceCard";
-import Stats from "@/components/Stats";
-import OccurrenceModal from "@/components/OccurrenceModal";
-import Header from "@/components/Header";
+
+import Stats from "@/app/components/Stats";
+import OccurrenceModal from "@/app/components/OccurrenceModal";
+import Header from "@/app/components/Header";
 import Loading from "@/components/Loading";
 import { Dashboard } from "./components/dashboard";
-// ✅ CORRETO: Importar o componente Dashboard (não o MonthlyTrendChart)
+import OccurrenceCard from "./components/OccurrenceCard";
+import SearchResultModal from "./components/SearchResultModal";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   const [list, setList] = useState<Occurrence[]>([]);
@@ -21,8 +23,30 @@ export default function Home() {
   const [sheet, setSheet] = useState<"SP" | "PE" | "ES">("SP");
   const [statusFilter, setStatusFilter] = useState<
     "Todos" | "Pendente" | "Em Andamento" | "Resolvido"
-  >("Todos");
+  >("Pendente");
   const [showDashboard, setShowDashboard] = useState(false);
+  const [searchedOccurrence, setSearchedOccurrence] =
+    useState<Occurrence | null>(null);
+
+  const [isSearchResultOpen, setIsSearchResultOpen] = useState(false);
+
+  const handleSearchByNF = (nf: string): boolean => {
+    const found = list.find((item) => item.nota?.toString() === nf);
+
+    if (found) {
+      setSearchedOccurrence(found);
+      setIsSearchResultOpen(true);
+      setShowDashboard(false);
+      return true;
+    }
+
+    return false;
+  };
+
+  const closeSearchResult = () => {
+    setIsSearchResultOpen(false);
+    setSearchedOccurrence(null);
+  };
 
   const filteredList = list.filter((item) => {
     if (statusFilter === "Todos") return true;
@@ -101,15 +125,19 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors pt-[130px]">
+    <div className="min-h-screen bg-gray-200/40 dark:bg-gray-950/95 transition-colors pt-[130px]">
       <Loading isOpen={loading} />
 
       <Header
         sheet={sheet}
         setSheet={setSheet}
         onNew={handleNew}
-        /*   onToggleDashboard={() => setShowDashboard((prev) => !prev)} */
-        goToHome={() => setShowDashboard(false)}
+        onSearchNF={handleSearchByNF}
+        onClearSearch={closeSearchResult}
+        goToHome={() => {
+          setShowDashboard(false);
+          closeSearchResult();
+        }}
         goToDashboard={() => setShowDashboard(true)}
       />
 
@@ -141,16 +169,23 @@ export default function Home() {
                     />
                   ))
                 : !loading && (
-                    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border p-12 text-center col-span-full transition-colors">
-                      <div className="bg-gray-100 dark:bg-gray-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Package className="w-10 h-10 text-gray-600 dark:text-gray-400" />
-                      </div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                    <div
+                      className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border 
+  p-12 text-center col-span-full
+  flex flex-col items-center justify-center
+  min-h-[55vh]"
+                    >
+                      <Package className="w-10 h-10 mx-auto mb-4 text-gray-500" />
+                      <h3 className="text-xl font-bold  text-gray-800 dark:text-gray-100">
                         Nenhuma ocorrência encontrada
                       </h3>
                     </div>
                   )}
             </div>
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 ">
+            <Footer branch={sheet} text="Tela inicial" />
           </div>
         </>
       )}
@@ -164,6 +199,14 @@ export default function Home() {
         onSubmit={handleSubmit}
         editingOccurrence={editingOccurrence}
         sheet={sheet}
+      />
+
+      <SearchResultModal
+        isOpen={isSearchResultOpen}
+        occurrence={searchedOccurrence}
+        onClose={closeSearchResult}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
       />
     </div>
   );

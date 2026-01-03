@@ -14,15 +14,7 @@ export default function Stats({
 }: StatsProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
-      <StatCard
-        label="Total"
-        value={list.length}
-        icon={FileText}
-        bgColor="bg-blue-100"
-        iconColor="text-blue-600"
-        active={activeFilter === "Todos"}
-        onClick={() => onFilterChange("Todos")}
-      />
+     
 
       <StatCard
         label="Pendentes"
@@ -42,6 +34,16 @@ export default function Stats({
         iconColor="text-blue-600"
         active={activeFilter === "Em Andamento"}
         onClick={() => onFilterChange("Em Andamento")}
+      />
+
+       <StatCard
+        label="Total"
+        value={list.length}
+        icon={FileText}
+        bgColor="bg-blue-100"
+        iconColor="text-blue-600"
+        active={activeFilter === "Todos"}
+        onClick={() => onFilterChange("Todos")}
       />
 
       <StatCard

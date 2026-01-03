@@ -9,6 +9,8 @@ interface HeaderProps {
   onNew: () => void;
   goToHome: () => void;
   goToDashboard: () => void;
+  onSearchNF: (nf: string) => boolean; // ✅ AQUI
+  onClearSearch: () => void;
 }
 
 export default function Header({
@@ -17,6 +19,7 @@ export default function Header({
   onNew,
   goToHome,
   goToDashboard,
+  onSearchNF,
 }: HeaderProps) {
   return (
     <div className="fixed top-0 left-0 w-full z-50 bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-800 transition-colors">
@@ -30,23 +33,28 @@ export default function Header({
                 rel="noopener noreferrer"
                 className="flex items-center justify-center"
               >
-                <Truck className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400" />
+                <Truck className="w-8 h-8 sm:w-8 sm:h-8 text-blue-600 dark:text-blue-400" />
               </a>
             </div>
 
-            <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight truncate">
+            {/* Titulo Clicável para voltar ao início */}
+            <button onClick={goToHome} className="min-w-0 text-left ">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 Ocorrências de Transporte
               </h1>
               <p className="text-xs sm:text-sm md:text-base text-gray-600 dark:text-gray-400 mt-0.5 truncate">
                 Sistema de Gestão de Ocorrências.
               </p>
-            </div>
+            </button>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 justify-end w-full sm:w-auto">
             {/* Sidebar com as funções de navegação */}
-            <Sidebar goToHome={goToHome} goToDashboard={goToDashboard} />
+            <Sidebar
+              goToHome={goToHome}
+              goToDashboard={goToDashboard}
+              onSearchNF={onSearchNF}
+            />
 
             <div className="flex items-center gap-1 sm:gap-3 min-w-[120px]">
               <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground dark:text-gray-100 flex-shrink-0" />

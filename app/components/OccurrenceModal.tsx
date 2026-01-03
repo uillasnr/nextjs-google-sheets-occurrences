@@ -16,6 +16,10 @@ import {
 } from "lucide-react";
 import type { Occurrence } from "@/types/occurrence";
 import { TIPO_OCORRENCIA_MAP } from "@/types/occurrence";
+import { TextInput } from "@/components/TextInput";
+import { SelectInput } from "@/components/SelectInput";
+import { TextAreaInput } from "@/components/TextAreaInput";
+import { DateInput } from "@/components/DateInput";
 
 interface OccurrenceModalProps {
   isOpen: boolean;
@@ -91,20 +95,58 @@ export default function OccurrenceModal({
     Object.entries(ESTADO_SIGLA_PARA_NOME).map(([sigla, nome]) => [nome, sigla])
   );
 
+  const toDateInputValue = (date?: string): string => {
+    if (!date) return "";
+
+    // Já está no formato correto
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return date;
+    }
+
+    // ISO completo (2024-01-10T03:00:00.000Z)
+    if (date.includes("T")) {
+      return date.split("T")[0];
+    }
+
+    // Formato brasileiro DD/MM/YYYY
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+      const [day, month, year] = date.split("/");
+      return `${year}-${month}-${day}`;
+    }
+
+    // Tentativa genérica (Date.parse)
+    const parsed = new Date(date);
+    if (!isNaN(parsed.getTime())) {
+      return parsed.toISOString().split("T")[0];
+    }
+
+    return "";
+  };
+
   useEffect(() => {
     if (editingOccurrence) {
       const updatedOccurrence = { ...editingOccurrence };
 
-      // Converte nome do estado para sigla
+      // Estado (nome → sigla)
       if (editingOccurrence.estado) {
         updatedOccurrence.estado =
           ESTADO_NOME_PARA_SIGLA[editingOccurrence.estado] ||
           editingOccurrence.estado;
       }
 
-      if (editingOccurrence.dataOcorrencia) {
+      // 🔥 CORREÇÃO DAS DATAS
+      updatedOccurrence.dataNota = toDateInputValue(editingOccurrence.dataNota);
+      updatedOccurrence.dataOcorrencia = toDateInputValue(
+        editingOccurrence.dataOcorrencia
+      );
+      updatedOccurrence.ultimaOcorrencia = toDateInputValue(
+        editingOccurrence.ultimaOcorrencia
+      );
+
+      // Tracking
+      if (updatedOccurrence.dataOcorrencia) {
         const dias = calculateDaysSinceOccurrence(
-          editingOccurrence.dataOcorrencia
+          updatedOccurrence.dataOcorrencia
         );
         updatedOccurrence.tracking =
           dias > 0 ? `${dias} ${dias === 1 ? "dia" : "dias"}` : "";
@@ -160,7 +202,7 @@ export default function OccurrenceModal({
     const newErrors: Record<string, string> = {};
 
     // ===== VALIDAÇÕES OBRIGATÓRIAS =====
-    
+
     // Nota Fiscal (obrigatório)
     if (!form.nota.trim()) {
       newErrors.nota = "Nota fiscal é obrigatória";
@@ -184,7 +226,8 @@ export default function OccurrenceModal({
     if (!form.solicitante.trim()) {
       newErrors.solicitante = "Solicitante é obrigatório";
     } else if (form.solicitante.trim().length < 3) {
-      newErrors.solicitante = "Nome do solicitante deve ter pelo menos 3 caracteres";
+      newErrors.solicitante =
+        "Nome do solicitante deve ter pelo menos 3 caracteres";
     }
 
     // Data da Nota (obrigatório e não pode ser futura)
@@ -209,12 +252,13 @@ export default function OccurrenceModal({
       if (dataOcorrenciaDate > hoje) {
         newErrors.dataOcorrencia = "Data da ocorrência não pode ser futura";
       }
-      
+
       // Validar se data da ocorrência não é anterior à data da nota
       if (form.dataNota) {
         const dataNotaDate = new Date(form.dataNota);
         if (dataOcorrenciaDate < dataNotaDate) {
-          newErrors.dataOcorrencia = "Data da ocorrência não pode ser anterior à data da nota";
+          newErrors.dataOcorrencia =
+            "Data da ocorrência não pode ser anterior à data da nota";
         }
       }
     }
@@ -223,7 +267,8 @@ export default function OccurrenceModal({
     if (!form.transportadora.trim()) {
       newErrors.transportadora = "Transportadora é obrigatória";
     } else if (form.transportadora.trim().length < 3) {
-      newErrors.transportadora = "Nome da transportadora deve ter pelo menos 3 caracteres";
+      newErrors.transportadora =
+        "Nome da transportadora deve ter pelo menos 3 caracteres";
     }
 
     // Cliente (obrigatório)
@@ -296,6 +341,8 @@ export default function OccurrenceModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const trackingNumero = Number(String(form.tracking).match(/\d+/)?.[0] || 0);
+
     if (!validateForm()) {
       // Scroll para o primeiro erro
       const firstErrorField = Object.keys(errors)[0];
@@ -324,6 +371,7 @@ export default function OccurrenceModal({
       ...form,
       estado: estadoNome,
       status: statusExcelValue,
+      tracking: trackingNumero > 0 ? `${trackingNumero}` : "",
     });
 
     setForm(emptyForm);
@@ -342,25 +390,27 @@ export default function OccurrenceModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-card-dark rounded-2xl shadow-2xl flex flex-col max-w-4xl w-full max-h-[90vh] border border-card-border overflow-hidden">
-        <div className="relative bg-card-dark rounded-2xl shadow-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-auto border border-card-border">
+      <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col max-w-4xl w-full max-h-[90vh] border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="relative p-6 overflow-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6 sticky top-0 bg-card-dark pb-4 border-b border-card-border z-10">
+          <div className="flex items-center justify-between mb-6 sticky top-0 bg-white dark:bg-gray-800 pb-4 border-b border-gray-200 dark:border-gray-700 z-10">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-brand-primary/10 rounded-lg">
-                <FileText className="w-6 h-6 text-brand-primary" />
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-text-primary">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {editingOccurrence ? "Editar Ocorrência" : "Nova Ocorrência"}
                 </h3>
-                <p className="text-sm text-text-secondary">Filial {sheet}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Filial {sheet}
+                </p>
               </div>
             </div>
 
             <button
               onClick={onClose}
-              className="text-text-secondary hover:text-text-primary hover:bg-input-bg rounded-lg p-2 transition-all"
+              className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100 rounded-lg p-2 transition-all"
             >
               <X className="w-6 h-6" />
             </button>
@@ -369,82 +419,53 @@ export default function OccurrenceModal({
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Informações Principais */}
             <div>
-              <h4 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-brand-primary" />
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />{" "}
                 Informações Principais
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Nota Fiscal <span className="text-status-error">*</span>
-                  </label>
-                  <input
+                  <TextInput
+                    label="Nota Fiscal"
                     name="nota"
+                    type="number"
                     value={form.nota}
                     onChange={updateField}
-                    className={`bg-input-bg border ${
-                      errors.nota ? "border-status-error" : "border-input-border"
-                    } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all placeholder:text-input-placeholder`}
+                    error={errors.nota}
+                    required
                     placeholder="Digite o número da nota"
                   />
-                  {errors.nota && (
-                    <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.nota}
-                    </p>
-                  )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Volumes <span className="text-status-error">*</span>
-                  </label>
-                  <input
+                  <TextInput
+                    label="Volumes"
                     name="volumes"
                     type="number"
-                    min="1"
+                    min={1}
                     value={form.volumes}
                     onChange={updateField}
-                    className={`!bg-input-bg border ${
-                      errors.volumes
-                        ? "!border-status-error"
-                        : "!border-input-border"
-                    } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary appearance-none transition-all placeholder:text-input-placeholder`}
+                    error={errors.volumes}
+                    required
                     placeholder="Quantidade de volumes"
                   />
-                  {errors.volumes && (
-                    <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.volumes}
-                    </p>
-                  )}
                 </div>
 
                 <div className="sm:col-span-2 lg:col-span-1">
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Tipo de Ocorrência <span className="text-status-error">*</span>
-                  </label>
-                  <select
+                  <SelectInput
+                    label="Tipo de Ocorrência"
                     name="tipo"
                     value={form.tipo}
                     onChange={updateField}
-                    className={`bg-input-bg border ${
-                      errors.tipo ? "border-status-error" : "border-input-border"
-                    } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all`}
-                  >
-                    <option value="">Selecione...</option>
-                    {Object.entries(TIPO_OCORRENCIA_MAP).map(([key, value]) => (
-                      <option key={key} value={value}>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.tipo && (
-                    <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.tipo}
-                    </p>
-                  )}
+                    error={errors.tipo}
+                    required
+                    options={Object.entries(TIPO_OCORRENCIA_MAP).map(
+                      ([_, value]) => ({
+                        label: value,
+                        value,
+                      })
+                    )}
+                  />
                 </div>
               </div>
             </div>
@@ -452,74 +473,43 @@ export default function OccurrenceModal({
             {/* Datas */}
             <div>
               <h4 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-brand-primary" />
+                <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 Datas
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Data da Nota <span className="text-status-error">*</span>
-                  </label>
-                  <input
-                    type="date"
+                  <DateInput
+                    label="Data da Nota"
                     name="dataNota"
                     value={form.dataNota}
                     onChange={updateField}
+                    error={errors.dataNota}
+                    required
                     max={new Date().toISOString().split("T")[0]}
-                    className={`bg-input-bg border ${
-                      errors.dataNota ? "border-status-error" : "border-input-border"
-                    } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all [color-scheme:dark]`}
                   />
-                  {errors.dataNota && (
-                    <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.dataNota}
-                    </p>
-                  )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Data da Ocorrência <span className="text-status-error">*</span>
-                  </label>
-                  <input
-                    type="date"
+                  <DateInput
+                    label="Data da Ocorrência"
                     name="dataOcorrencia"
                     value={form.dataOcorrencia}
                     onChange={updateField}
+                    error={errors.dataOcorrencia}
+                    required
                     max={new Date().toISOString().split("T")[0]}
-                    className={`bg-input-bg border ${
-                      errors.dataOcorrencia ? "border-status-error" : "border-input-border"
-                    } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all [color-scheme:dark]`}
                   />
-                  {errors.dataOcorrencia && (
-                    <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.dataOcorrencia}
-                    </p>
-                  )}
                 </div>
 
                 <div className="sm:col-span-2 lg:col-span-1">
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Última Ocorrência
-                  </label>
-                  <input
-                    type="date"
+                  <DateInput
+                    label="Última Ocorrência"
                     name="ultimaOcorrencia"
                     value={form.ultimaOcorrencia}
                     onChange={updateField}
+                    error={errors.ultimaOcorrencia}
                     max={new Date().toISOString().split("T")[0]}
-                    className={`bg-input-bg border ${
-                      errors.ultimaOcorrencia ? "border-status-error" : "border-input-border"
-                    } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all [color-scheme:dark]`}
                   />
-                  {errors.ultimaOcorrencia && (
-                    <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.ultimaOcorrencia}
-                    </p>
-                  )}
                 </div>
               </div>
             </div>
@@ -527,114 +517,74 @@ export default function OccurrenceModal({
             {/* Partes Envolvidas */}
             <div>
               <h4 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                <Users className="w-5 h-5 text-brand-primary" />
+                <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 Partes Envolvidas
               </h4>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-text-primary mb-2">
-                  Cliente <span className="text-status-error">*</span>
-                </label>
-                <input
+                <TextInput
+                  label="Cliente"
                   name="cliente"
+                  min={1}
                   value={form.cliente}
                   onChange={updateField}
-                  className={`bg-input-bg border ${
-                    errors.cliente ? "border-status-error" : "border-input-border"
-                  } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all placeholder:text-input-placeholder`}
+                  error={errors.cliente}
+                  required
                   placeholder="Nome do cliente"
                 />
-                {errors.cliente && (
-                  <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    {errors.cliente}
-                  </p>
-                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Transportadora <span className="text-status-error">*</span>
-                  </label>
-                  <input
+                  <TextInput
+                    label="Transportadora"
                     name="transportadora"
+                    min={1}
                     value={form.transportadora}
                     onChange={updateField}
-                    className={`bg-input-bg border ${
-                      errors.transportadora ? "border-status-error" : "border-input-border"
-                    } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all placeholder:text-input-placeholder`}
+                    error={errors.cliente}
+                    required
                     placeholder="Nome da transportadora"
                   />
-                  {errors.transportadora && (
-                    <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.transportadora}
-                    </p>
-                  )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Número do Pedido <span className="text-status-error">*</span>
-                  </label>
-                  <input
+                  <TextInput
+                    label="Número do Pedido"
                     name="pedido"
+                    type="number"
+                    min={1}
                     value={form.pedido}
                     onChange={updateField}
-                    className={`bg-input-bg border ${
-                      errors.pedido ? "border-status-error" : "border-input-border"
-                    } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all placeholder:text-input-placeholder`}
+                    error={errors.pedido}
+                    required
                     placeholder="Número do pedido"
                   />
-                  {errors.pedido && (
-                    <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.pedido}
-                    </p>
-                  )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Responsável pela análise <span className="text-status-error">*</span>
-                  </label>
-                  <textarea
+                  <TextInput
+                    label="Responsável pela análise"
                     name="pendencia"
+                    min={1}
                     value={form.pendencia}
                     onChange={updateField}
-                    rows={1}
+                    error={errors.pendencia}
+                    required
                     placeholder="Nome do responsável"
-                    className={`bg-input-bg border resize-none ${
-                      errors.pendencia ? "border-status-error" : "border-input-border"
-                    } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all placeholder:text-input-placeholder`}
                   />
-                  {errors.pendencia && (
-                    <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.pendencia}
-                    </p>
-                  )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Solicitante <span className="text-status-error">*</span>
-                  </label>
-                  <input
+                  <TextInput
+                    label="Solicitante"
                     name="solicitante"
+                    min={1}
                     value={form.solicitante}
                     onChange={updateField}
-                    className={`bg-input-bg border ${
-                      errors.solicitante ? "border-status-error" : "border-input-border"
-                    } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all placeholder:text-input-placeholder`}
+                    error={errors.solicitante}
+                    required
                     placeholder="Nome do solicitante"
                   />
-                  {errors.solicitante && (
-                    <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.solicitante}
-                    </p>
-                  )}
                 </div>
               </div>
             </div>
@@ -642,56 +592,38 @@ export default function OccurrenceModal({
             {/* Localização */}
             <div>
               <h4 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-brand-primary" />
+                <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 Localização
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Destino <span className="text-status-error">*</span>
-                  </label>
-                  <input
+                  <TextInput
+                    label="Destino"
                     name="destino"
+                    min={1}
                     value={form.destino}
                     onChange={updateField}
-                    className={`bg-input-bg border ${
-                      errors.destino ? "border-status-error" : "border-input-border"
-                    } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all placeholder:text-input-placeholder`}
+                    error={errors.destino}
+                    required
                     placeholder="Cidade de destino"
                   />
-                  {errors.destino && (
-                    <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.destino}
-                    </p>
-                  )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Estado <span className="text-status-error">*</span>
-                  </label>
-                  <select
+                  <SelectInput
+                    label="Estado"
                     name="estado"
                     value={form.estado}
                     onChange={updateField}
-                    className={`bg-input-bg border ${
-                      errors.estado ? "border-status-error" : "border-input-border"
-                    } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all`}
-                  >
-                    <option value="">Selecione...</option>
-                    {Object.entries(ESTADO_SIGLA_PARA_NOME).map(([sigla, nome]) => (
-                      <option key={sigla} value={sigla}>
-                        {nome}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.estado && (
-                    <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.estado}
-                    </p>
-                  )}
+                    error={errors.estado}
+                    required
+                    options={Object.entries(ESTADO_SIGLA_PARA_NOME).map(
+                      ([sigla, nome]) => ({
+                        label: nome,
+                        value: sigla,
+                      })
+                    )}
+                  />
                 </div>
               </div>
             </div>
@@ -699,58 +631,40 @@ export default function OccurrenceModal({
             {/* Status e Tracking */}
             <div>
               <h4 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                <Activity className="w-5 h-5 text-brand-primary" />
+                <Activity className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 Status e Rastreamento
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Status Cliente <span className="text-status-error">*</span>
-                  </label>
-                  <select
+                  <SelectInput
+                    label="Status Cliente"
                     name="statusCliente"
                     value={form.statusCliente}
                     onChange={updateField}
-                    className={`bg-input-bg border ${
-                      errors.statusCliente ? "border-status-error" : "border-input-border"
-                    } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all`}
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="EM ABERTO">Pendente</option>
-                    <option value="RESOLVIDO">Resolvido</option>
-                    <option value="Falta de provas">Falta de provas</option>
-                  </select>
-                  {errors.statusCliente && (
-                    <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.statusCliente}
-                    </p>
-                  )}
+                    error={errors.statusCliente}
+                    required
+                    options={[
+                      { label: "Pendente", value: "EM ABERTO" },
+                      { label: "Resolvido", value: "RESOLVIDO" },
+                      { label: "Falta de provas", value: "Falta de provas" },
+                    ]}
+                  />
                 </div>
 
                 <div className="sm:col-span-2 lg:col-span-1">
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Status Transportadora <span className="text-status-error">*</span>
-                  </label>
-                  <select
+                  <SelectInput
+                    label="Status Transportadora"
                     name="statusTransportadora"
                     value={form.statusTransportadora}
                     onChange={updateField}
-                    className={`bg-input-bg border ${
-                      errors.statusTransportadora ? "border-status-error" : "border-input-border"
-                    } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all`}
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="EM ABERTO">Pendente</option>
-                    <option value="RESOLVIDO">Resolvido</option>
-                    <option value="Falta de provas">Falta de provas</option>
-                  </select>
-                  {errors.statusTransportadora && (
-                    <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.statusTransportadora}
-                    </p>
-                  )}
+                    error={errors.statusTransportadora}
+                    required
+                    options={[
+                      { label: "Pendente", value: "EM ABERTO" },
+                      { label: "Resolvido", value: "RESOLVIDO" },
+                      { label: "Falta de provas", value: "Falta de provas" },
+                    ]}
+                  />
                 </div>
 
                 <div className="sm:col-span-2 lg:col-span-3">
@@ -765,7 +679,7 @@ export default function OccurrenceModal({
                       name="tracking"
                       value={form.tracking}
                       readOnly
-                      className="bg-input-bg/50 border border-input-border text-text-secondary rounded-lg p-3 w-full cursor-not-allowed placeholder:text-input-placeholder"
+                      className="bg-gray-200 dark:bg-gray-900 border border-i border-gray-300 dark:border-gray-600 text-text-secondary rounded-lg p-3 w-full cursor-not-allowed placeholder:text-input-placeholder"
                       placeholder={
                         form.dataOcorrencia
                           ? "Calculando..."
@@ -774,12 +688,13 @@ export default function OccurrenceModal({
                     />
                     {form.tracking && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <Activity className="w-5 h-5 text-brand-primary animate-pulse" />
+                        <Activity className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                       </div>
                     )}
                   </div>
                   <p className="text-xs text-text-tertiary mt-1">
-                    O contador inicia na data da ocorrência e atualiza automaticamente
+                    O contador inicia na data da ocorrência e atualiza
+                    automaticamente
                   </p>
                 </div>
               </div>
@@ -788,52 +703,32 @@ export default function OccurrenceModal({
             {/* Descrições */}
             <div>
               <h4 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-brand-primary" />
+                <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 Descrições
               </h4>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Descreva a ocorrência <span className="text-status-error">*</span>
-                  </label>
-                  <textarea
+                  <TextAreaInput
+                    label="Descreva a ocorrência"
                     name="ocorrencia"
                     value={form.ocorrencia}
                     onChange={updateField}
-                    rows={3}
-                    className={`bg-input-bg border ${
-                      errors.ocorrencia ? "border-status-error" : "border-input-border"
-                    } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all resize-none placeholder:text-input-placeholder`}
+                    error={errors.ocorrencia}
+                    required
                     placeholder="Qual é o motivo da ocorrência (mínimo 10 caracteres)"
                   />
-                  {errors.ocorrencia && (
-                    <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.ocorrencia}
-                    </p>
-                  )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-text-primary mb-2">
-                    Observações
-                  </label>
-                  <textarea
+                  <TextAreaInput
+                    label="Observações"
                     name="obs"
                     value={form.obs}
                     onChange={updateField}
-                    rows={3}
-                    className={`bg-input-bg border ${
-                      errors.obs ? "border-status-error" : "border-input-border"
-                    } text-text-primary rounded-lg p-3 w-full focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition-all resize-none placeholder:text-input-placeholder`}
+                    error={errors.obs}
+                    required
                     placeholder="Observações adicionais (opcional)"
                   />
-                  {errors.obs && (
-                    <p className="text-status-error text-xs mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.obs}
-                    </p>
-                  )}
                 </div>
               </div>
             </div>
@@ -858,17 +753,17 @@ export default function OccurrenceModal({
             )}
 
             {/* Botões */}
-            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-6 border-t border-card-border sticky bottom-0 bg-card-dark/60 backdrop-blur-md z-20">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end pt-6  sticky bottom-0 bg-gray-200 dark:bg-gray-800/60 backdrop-blur-md z-20">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-6 py-3 border border-input-border text-text-primary rounded-lg hover:bg-input-bg transition-all font-semibold"
+                className="px-6 py-3 border border-gray-600 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-semibold"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="px-6 py-3 bg-brand-primary hover:bg-brand-hover text-background-dark rounded-lg transition-all font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white  rounded-lg transition-all font-semibold shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
               >
                 {editingOccurrence ? (
                   <>

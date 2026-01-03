@@ -8,15 +8,19 @@ import SearchModal from "./SearchModal";
 interface SidebarProps {
   goToHome: () => void;
   goToDashboard: () => void;
+  onSearchNF: (nf: string) => boolean;
 }
 
-export default function Sidebar({ goToHome, goToDashboard }: SidebarProps) {
+export default function Sidebar({
+  goToHome,
+  goToDashboard,
+  onSearchNF,
+}: SidebarProps) {
   const [open, setOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  const handleSearch = (nfNumber: string) => {
-    console.log("Buscar NF:", nfNumber);
-    // Aqui você pode chamar sua função que filtra a lista no Home
+  const handleSearch = (nf: string): boolean => {
+    return onSearchNF(nf);
   };
 
   const ThemeToggle = dynamic(
@@ -88,7 +92,10 @@ export default function Sidebar({ goToHome, goToDashboard }: SidebarProps) {
 
           {/* Buscar Ocorrências (opcional) */}
           <button
-            onClick={() => setIsSearchOpen(true)}
+            onClick={() => {
+              setIsSearchOpen(true);
+              setOpen(false); // 👈 fecha o sidebar
+            }}
             className="flex items-center gap-3 px-4 py-3 rounded-lg
               bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700
               hover:bg-gray-300 dark:hover:bg-gray-700
@@ -119,7 +126,15 @@ export default function Sidebar({ goToHome, goToDashboard }: SidebarProps) {
       <SearchModal
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
-        onSearch={handleSearch}
+        onSearch={(nf) => {
+          const found = handleSearch(nf);
+
+          if (found) {
+            setIsSearchOpen(false);
+          }
+
+          return found;
+        }}
       />
     </>
   );

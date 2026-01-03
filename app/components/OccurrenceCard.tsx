@@ -16,10 +16,12 @@ import {
   Edit,
   Trash2,
   FileText,
+  Boxes,
 
 } from "lucide-react";
 import { useState } from "react";
-import { ConfirmDeleteModal } from "./ConfirmDeleteModal";
+import { ConfirmDeleteModal } from "@/components/ConfirmDeleteModal";
+
 
 interface OccurrenceCardProps {
   item: Occurrence;
@@ -85,14 +87,14 @@ const [selectedId, setSelectedId] = useState<string | null>(null);
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500/50 transition-all duration-300 shadow-lg hover:shadow-xl w-full max-w-full overflow-hidden  shadow-md shadow-gray-400 dark:shadow-gray-900">
       {/* Header */}
       <div
-        className="bg-gray-50 dark:bg-gray-900/50 px-4 py-3 rounded-md
+        className="bg-gray-300 dark:bg-gray-900/50 px-4 py-3 rounded-md
                 shadow-md shadow-gray-400 dark:shadow-gray-900"
       >
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 min-h-[60px]">
           {/* Left side */}
           <div className="flex items-center gap-3 flex-1 min-w-0 flex-wrap sm:flex-nowrap">
             <div className="bg-blue-500/10 dark:bg-blue-500/20 p-2 rounded-lg border border-blue-500/20 flex-shrink-0">
-              <Package className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <Boxes className="w-7 h-7 text-blue-600 dark:text-blue-400" />
             </div>
 
             <div className="flex-1 min-w-0">
