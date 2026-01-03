@@ -34,10 +34,19 @@ export function OccurrenceTypeByTransportadoraChart({ data, year }: Props) {
 
   console.log("transportadoras", data);
 
-  if (!data || data.length === 0) {
+const hasData =
+    data &&
+    data.some((item) =>
+      Object.entries(item.transportadoras ?? {}).some(
+        ([_, tipos]: any) =>
+          Object.values(tipos ?? {}).some((valor: any) => Number(valor) > 0)
+      )
+    );
+
+  if (!hasData) {
     return (
       <div className="flex h-[300px] items-center justify-center text-gray-500 dark:text-gray-400">
-        <p>Nenhum dado disponível</p>
+        <p>Nenhum dado disponível {year}</p>
       </div>
     );
   }

@@ -11,6 +11,7 @@ import {
   groupOccurrencesByType,
 } from "../services/googleSheets/helpers";
 import { OccurrenceTypeByTransportadoraChart } from "./occurrence-type-by-transportadora-chart";
+import Footer from "@/components/Footer";
 
 interface DashboardProps {
   selectedBranch: "SP" | "PE" | "ES";
@@ -21,13 +22,28 @@ export function Dashboard({ selectedBranch, occurrences }: DashboardProps) {
   const currentYear = new Date().getFullYear();
   const years = getAvailableYears(occurrences);
 
-  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+  // garante que o array está ordenado
+  const sortedYears = [...years].sort((a, b) => a - b);
+
+  // escolhe o ano inicial
+  const initialYear =
+    sortedYears.length > 0
+      ? sortedYears[sortedYears.length - 1] // mais recente
+      : new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState<number>(initialYear);
 
   const typeByMonthData = groupOccurrencesByType(occurrences, selectedYear);
   const byTransportadoraData = groupOccurrencesByTransportadora(
     occurrences,
     selectedYear
   );
+
+  const hasOccurrences = occurrences.length > 0;
+
+  const hasTypeByMonthData = typeByMonthData && typeByMonthData.length > 0;
+
+  const hasByTransportadoraData =
+    byTransportadoraData && Object.keys(byTransportadoraData).length > 0;
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto px-4">
@@ -57,32 +73,32 @@ export function Dashboard({ selectedBranch, occurrences }: DashboardProps) {
       </div>
 
       {/* Gráficos 1 e 2 */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 justify-items-center">
-        <Card className="w-full lg:max-w-3xl border border-gray-300 dark:border-gray-600 rounded-lg p-6">
-          <MonthlyTrendChart occurrences={occurrences} year={selectedYear} />
-        </Card>
+      {hasOccurrences && hasTypeByMonthData && (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 justify-items-center">
+          <Card className="w-full lg:max-w-3xl border border-gray-300 dark:border-gray-600 rounded-lg p-6">
+            <MonthlyTrendChart occurrences={occurrences} year={selectedYear} />
+          </Card>
 
-        <Card className="w-full lg:max-w-3xl border border-gray-300 dark:border-gray-600 rounded-lg p-6">
-          <OccurrenceTypeChart data={typeByMonthData} year={selectedYear} />
-        </Card>
-      </div>
+          <Card className="w-full lg:max-w-3xl border border-gray-300 dark:border-gray-600 rounded-lg p-6">
+            <OccurrenceTypeChart data={typeByMonthData} year={selectedYear} />
+          </Card>
+        </div>
+      )}
 
       {/* Gráfico 3 centralizado */}
-      <div className="flex justify-center pb-10">
-        <Card className="w-full lg:max-w-6xl border border-gray-300 dark:border-gray-600 rounded-lg p-6">
-          <OccurrenceTypeByTransportadoraChart
-            data={byTransportadoraData}
-            year={selectedYear}
-          />
-        </Card>
-      </div>
+      {hasByTransportadoraData && (
+        <div className="flex justify-center pb-10">
+          <Card className="w-full lg:max-w-6xl border border-gray-300 dark:border-gray-600 rounded-lg p-6">
+            <OccurrenceTypeByTransportadoraChart
+              data={byTransportadoraData}
+              year={selectedYear}
+            />
+          </Card>
+        </div>
+      )}
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 dark:border-gray-700 py-4 text-center">
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          © {new Date().getFullYear()} • Dashboard de Ocorrências
-        </p>
-      </footer>
+      <Footer branch={selectedBranch} text="Dashboard de Ocorrências" />
     </div>
   );
 }

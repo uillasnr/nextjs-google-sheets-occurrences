@@ -31,13 +31,22 @@ const TYPE_COLORS = [
 export function OccurrenceTypeChart({ data, year }: Props) {
   console.log("OccurrenceTypeChart data:", data);
 
-  if (!data || data.length === 0) {
-    return (
-      <div className="flex h-[300px] items-center justify-center text-gray-500 dark:text-gray-400">
-        <p>Nenhum dado disponível</p>
-      </div>
-    );
-  }
+const hasData =
+  data &&
+  data.some((item) =>
+    Object.entries(item).some(
+      ([key, value]) => key !== "month" && Number(value) > 0
+    )
+  );
+
+if (!hasData) {
+  return (
+    <div className="flex h-[300px] items-center justify-center text-gray-500 dark:text-gray-400">
+      <p>Nenhum dado disponível {year}</p>
+    </div>
+  );
+}
+
 
   // 🔹 Descobre todos os tipos
   const types = Array.from(
