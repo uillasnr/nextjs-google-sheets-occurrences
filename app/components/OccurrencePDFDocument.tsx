@@ -43,11 +43,8 @@ const statusStyle = (status?: string) => {
   return styles.statusDefault;
 };
 
-/* 🔥 CORREÇÃO DEFINITIVA DO ERRO */
 const getRowStyle = (index: number) => {
-  return index % 2 === 1
-    ? [styles.row, styles.rowAlt]
-    : [styles.row];
+  return index % 2 === 1 ? [styles.row, styles.rowAlt] : [styles.row];
 };
 
 /* ================= STYLES ================= */
@@ -58,12 +55,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
   },
 
-  /* ---- CABEÇALHO ---- */
   header: {
     marginBottom: 8,
   },
 
-  /* ---- TABELA ---- */
   tableHeader: {
     flexDirection: "row",
     backgroundColor: "#1e40af",
@@ -93,7 +88,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
 
-  /* ---- STATUS ---- */
   statusBadge: {
     fontSize: 6,
     fontWeight: 700,
@@ -118,7 +112,6 @@ const styles = StyleSheet.create({
     color: "#374151",
   },
 
-  /* ---- FOOTER ---- */
   footer: {
     position: "absolute",
     bottom: 10,
@@ -141,43 +134,29 @@ interface Props {
   sheet: "SP" | "PE" | "ES";
 }
 
-const OccurrencePDFDocument: React.FC<Props> = ({
-  occurrences,
-  sheet,
-}) => {
+const OccurrencePDFDocument: React.FC<Props> = ({ occurrences, sheet }) => {
+  // 🔥 ORDENA: Pendente sempre primeiro
+  const sortedOccurrences = [...occurrences].sort((a, b) => {
+    if (a.status === "Pendente" && b.status !== "Pendente") return -1;
+    if (a.status !== "Pendente" && b.status === "Pendente") return 1;
+    return 0;
+  });
+
   return (
     <Document>
       <Page size="A4" orientation="landscape" style={styles.page}>
-
-        {/* ===== CABEÇALHO MODERNO ===== */}
+        {/* ===== CABEÇALHO ===== */}
         <View style={styles.header}>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: 700,
-              color: "#1e40af",
-              letterSpacing: 0.5,
-            }}
-          >
+          <Text style={{ fontSize: 16, fontWeight: 700, color: "#1e40af" }}>
             RELATÓRIO DE OCORRÊNCIAS
           </Text>
 
-          <Text
-            style={{
-              fontSize: 8.5,
-              color: "#64748b",
-              marginTop: 2,
-            }}
-          >
-            Pendente • Em Andamento 
+          <Text style={{ fontSize: 8.5, color: "#64748b", marginTop: 2 }}>
+            Pendente • Em Andamento
           </Text>
 
           <View
-            style={{
-              height: 1,
-              backgroundColor: "#e5e7eb",
-              marginVertical: 6,
-            }}
+            style={{ height: 1, backgroundColor: "#e5e7eb", marginVertical: 6 }}
           />
 
           <View
@@ -194,7 +173,7 @@ const OccurrencePDFDocument: React.FC<Props> = ({
           </View>
         </View>
 
-        {/* ===== HEADER DA TABELA ===== */}
+        {/* ===== HEADER TABELA ===== */}
         <View style={styles.tableHeader}>
           {[
             "NF",
@@ -220,16 +199,30 @@ const OccurrencePDFDocument: React.FC<Props> = ({
         </View>
 
         {/* ===== LINHAS ===== */}
-        {occurrences.map((occ, i) => (
+        {sortedOccurrences.map((occ, i) => (
           <View key={occ.id || i} style={getRowStyle(i)}>
             <Text style={[styles.cell, { flex: 1 }]}>{occ.nota}</Text>
-            <Text style={[styles.cell, { flex: 1 }]}>{(occ.cliente || "").slice(0, 18)}</Text>
-            <Text style={[styles.cell, { flex: 1 }]}>{(occ.transportadora || "").slice(0, 18)}</Text>
-            <Text style={[styles.cell, { flex: 1 }]}>{formatDate(occ.dataNota)}</Text>
-            <Text style={[styles.cell, { flex: 1 }]}>{formatDate(occ.dataOcorrencia)}</Text>
-            <Text style={[styles.cell, { flex: 1 }]}>{(occ.solicitante || "").slice(0, 14)}</Text>
-            <Text style={[styles.cell, { flex: 2 }]}>{(occ.ocorrencia || "").slice(0, 70)}</Text>
-            <Text style={[styles.cell, { flex: 2 }]}>{(occ.obs || "").slice(0, 70)}</Text>
+            <Text style={[styles.cell, { flex: 1 }]}>
+              {(occ.cliente || "").slice(0, 18)}
+            </Text>
+            <Text style={[styles.cell, { flex: 1 }]}>
+              {(occ.transportadora || "").slice(0, 18)}
+            </Text>
+            <Text style={[styles.cell, { flex: 1 }]}>
+              {formatDate(occ.dataNota)}
+            </Text>
+            <Text style={[styles.cell, { flex: 1 }]}>
+              {formatDate(occ.dataOcorrencia)}
+            </Text>
+            <Text style={[styles.cell, { flex: 1 }]}>
+              {(occ.solicitante || "").slice(0, 14)}
+            </Text>
+            <Text style={[styles.cell, { flex: 2 }]}>
+              {(occ.ocorrencia || "").slice(0, 70)}
+            </Text>
+            <Text style={[styles.cell, { flex: 2 }]}>
+              {(occ.obs || "").slice(0, 70)}
+            </Text>
 
             <View style={{ flex: 1, alignItems: "center" }}>
               <Text style={[styles.statusBadge, statusStyle(occ.status)]}>
@@ -249,7 +242,6 @@ const OccurrencePDFDocument: React.FC<Props> = ({
             }
           />
         </View>
-
       </Page>
     </Document>
   );
