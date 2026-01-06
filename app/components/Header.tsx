@@ -1,25 +1,29 @@
 "use client";
 
 import Sidebar from "@/app/components/Sidebar";
+import { Occurrence } from "@/types/occurrence";
 import { Truck, Building2, Plus } from "lucide-react";
 
 interface HeaderProps {
   sheet: "SP" | "PE" | "ES";
   setSheet: (sheet: "SP" | "PE" | "ES") => void;
   onNew: () => void;
+  onSearchNF: (nf: string) => boolean;
+  onClearSearch: () => void;
   goToHome: () => void;
   goToDashboard: () => void;
-  onSearchNF: (nf: string) => boolean; // ✅ AQUI
-  onClearSearch: () => void;
+  occurrences: Occurrence[]; // 👈 NOVO: recebe as ocorrências
 }
 
 export default function Header({
   sheet,
   setSheet,
   onNew,
+  onSearchNF,
+  onClearSearch,
   goToHome,
   goToDashboard,
-  onSearchNF,
+  occurrences, // 👈 NOVO
 }: HeaderProps) {
   return (
     <div className="fixed top-0 left-0 w-full z-50 bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-800 transition-colors">
@@ -50,11 +54,13 @@ export default function Header({
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 justify-end w-full sm:w-auto">
             {/* Sidebar com as funções de navegação */}
-            <Sidebar
-              goToHome={goToHome}
-              goToDashboard={goToDashboard}
-              onSearchNF={onSearchNF}
-            />
+           <Sidebar
+        goToHome={goToHome}
+        goToDashboard={goToDashboard}
+        onSearchNF={onSearchNF}
+        occurrences={occurrences} // 👈 PASSANDO AS OCORRÊNCIAS
+        sheet={sheet} // 👈 PASSANDO A FILIAL
+      />
 
             <div className="flex items-center gap-1 sm:gap-3 min-w-[120px]">
               <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground dark:text-gray-100 flex-shrink-0" />

@@ -139,6 +139,7 @@ export default function Home() {
           closeSearchResult();
         }}
         goToDashboard={() => setShowDashboard(true)}
+          occurrences={list}
       />
 
       {showDashboard ? (

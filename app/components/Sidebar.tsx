@@ -4,17 +4,23 @@ import { BarChart3, Search, Truck, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import SearchModal from "./SearchModal";
+import { Occurrence } from "@/types/occurrence";
+import PDFReportButton from "@/components/PdfButton";
 
 interface SidebarProps {
   goToHome: () => void;
   goToDashboard: () => void;
   onSearchNF: (nf: string) => boolean;
+  occurrences: Occurrence[]; // 👈 NOVO
+  sheet: "SP" | "PE" | "ES"; // 👈 NOVO
 }
 
 export default function Sidebar({
   goToHome,
   goToDashboard,
   onSearchNF,
+  occurrences,
+  sheet,
 }: SidebarProps) {
   const [open, setOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -104,6 +110,11 @@ export default function Sidebar({
             <Search className="w-5 h-5" />
             Buscar Ocorrências
           </button>
+
+           {/* 🆕 BOTÃO DE GERAR PDF - DESTAQUE NO TOPO */}
+          <div className="pb-4 border-b border-t pt-3 border-gray-200 dark:border-gray-700">
+            <PDFReportButton occurrences={occurrences} sheet={sheet} />
+          </div>
 
           {/* Theme Toggle */}
           <ThemeToggle />
