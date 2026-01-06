@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState, useEffect } from "react";
 import {
   X,
@@ -97,83 +96,67 @@ export default function OccurrenceModal({
 
   const toDateInputValue = (date?: string): string => {
     if (!date) return "";
-
-    // Já está no formato correto
-    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      return date;
-    }
-
-    // ISO completo (2024-01-10T03:00:00.000Z)
-    if (date.includes("T")) {
-      return date.split("T")[0];
-    }
-
-    // Formato brasileiro DD/MM/YYYY
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
+    if (date.includes("T")) return date.split("T")[0];
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
-      const [day, month, year] = date.split("/");
-      return `${year}-${month}-${day}`;
+      const [d, m, y] = date.split("/");
+      return `${y}-${m}-${d}`;
     }
-
-    // Tentativa genérica (Date.parse)
     const parsed = new Date(date);
-    if (!isNaN(parsed.getTime())) {
-      return parsed.toISOString().split("T")[0];
-    }
-
-    return "";
+    return isNaN(parsed.getTime())
+      ? ""
+      : parsed.toISOString().split("T")[0];
   };
+
+ // ✅ FUNÇÃO CORRIGIDA: Compara data da nota com última ocorrência
+const calculateDaysOpen = (
+  dataNota?: string,
+  ultimaOcorrencia?: string
+): number => {
+  // Se não houver última ocorrência, usa a data atual
+  // Se não houver data da nota, retorna 0
+  if (!dataNota) return 0;
+
+  const inicio = new Date(dataNota);
+  const fim = ultimaOcorrencia ? new Date(ultimaOcorrencia) : new Date();
+
+  inicio.setHours(0, 0, 0, 0);
+  fim.setHours(0, 0, 0, 0);
+
+  const diffMs = fim.getTime() - inicio.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  return diffDays >= 0 ? diffDays : 0;
+};
 
   useEffect(() => {
     if (editingOccurrence) {
-      const updatedOccurrence = { ...editingOccurrence };
+      const updated = { ...editingOccurrence };
 
-      // Estado (nome → sigla)
-      if (editingOccurrence.estado) {
-        updatedOccurrence.estado =
-          ESTADO_NOME_PARA_SIGLA[editingOccurrence.estado] ||
-          editingOccurrence.estado;
+      if (updated.estado) {
+        updated.estado =
+          ESTADO_NOME_PARA_SIGLA[updated.estado] || updated.estado;
       }
 
-      // 🔥 CORREÇÃO DAS DATAS
-      updatedOccurrence.dataNota = toDateInputValue(editingOccurrence.dataNota);
-      updatedOccurrence.dataOcorrencia = toDateInputValue(
-        editingOccurrence.dataOcorrencia
-      );
-      updatedOccurrence.ultimaOcorrencia = toDateInputValue(
-        editingOccurrence.ultimaOcorrencia
+      updated.dataNota = toDateInputValue(updated.dataNota);
+      updated.ultimaOcorrencia = toDateInputValue(updated.ultimaOcorrencia);
+      updated.dataOcorrencia = toDateInputValue(updated.dataOcorrencia);
+
+      const dias = calculateDaysOpen(
+        updated.dataNota,
+        updated.ultimaOcorrencia
       );
 
-      // Tracking
-      if (updatedOccurrence.dataOcorrencia) {
-        const dias = calculateDaysSinceOccurrence(
-          updatedOccurrence.dataOcorrencia
-        );
-        updatedOccurrence.tracking =
-          dias > 0 ? `${dias} ${dias === 1 ? "dia" : "dias"}` : "";
-      }
+      updated.tracking =
+        dias > 0 ? `${dias} ${dias === 1 ? "dia" : "dias"}` : "";
 
-      setForm(updatedOccurrence);
+      setForm(updated);
     } else {
       setForm(emptyForm);
     }
 
     setErrors({});
   }, [editingOccurrence, isOpen]);
-
-  const calculateDaysSinceOccurrence = (dataOcorrencia: string): number => {
-    if (!dataOcorrencia) return 0;
-
-    const dataInicio = new Date(dataOcorrencia);
-    const hoje = new Date();
-
-    dataInicio.setHours(0, 0, 0, 0);
-    hoje.setHours(0, 0, 0, 0);
-
-    const diferencaEmMs = hoje.getTime() - dataInicio.getTime();
-    const diferencaEmDias = Math.floor(diferencaEmMs / (1000 * 60 * 60 * 24));
-
-    return diferencaEmDias >= 0 ? diferencaEmDias : 0;
-  };
 
   const updateField = (
     e: React.ChangeEvent<
@@ -183,181 +166,31 @@ export default function OccurrenceModal({
     const { name, value } = e.target;
     const updatedForm = { ...form, [name]: value };
 
-    // Se a data da ocorrência foi alterada, recalcula o tracking
-    if (name === "dataOcorrencia") {
-      const dias = calculateDaysSinceOccurrence(value);
+    if (name === "dataNota" || name === "ultimaOcorrencia") {
+      const dias = calculateDaysOpen(
+        name === "dataNota" ? value : form.dataNota,
+        name === "ultimaOcorrencia" ? value : form.ultimaOcorrencia
+      );
+
       updatedForm.tracking =
         dias > 0 ? `${dias} ${dias === 1 ? "dia" : "dias"}` : "";
     }
 
     setForm(updatedForm);
 
-    // Limpa erro do campo quando o usuário começa a digitar
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
     }
   };
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    // ===== VALIDAÇÕES OBRIGATÓRIAS =====
-
-    // Nota Fiscal (obrigatório)
-    if (!form.nota.trim()) {
-      newErrors.nota = "Nota fiscal é obrigatória";
-    } else if (form.nota.trim().length < 3) {
-      newErrors.nota = "Nota fiscal deve ter pelo menos 3 caracteres";
-    }
-
-    // Volumes (obrigatório e deve ser número positivo)
-    if (!form.volumes) {
-      newErrors.volumes = "Volumes é obrigatório";
-    } else if (isNaN(Number(form.volumes)) || Number(form.volumes) <= 0) {
-      newErrors.volumes = "Deve ser um número válido maior que zero";
-    }
-
-    // Tipo de Ocorrência (obrigatório)
-    if (!form.tipo || form.tipo.trim() === "") {
-      newErrors.tipo = "Tipo de ocorrência é obrigatório";
-    }
-
-    // Solicitante (obrigatório)
-    if (!form.solicitante.trim()) {
-      newErrors.solicitante = "Solicitante é obrigatório";
-    } else if (form.solicitante.trim().length < 3) {
-      newErrors.solicitante =
-        "Nome do solicitante deve ter pelo menos 3 caracteres";
-    }
-
-    // Data da Nota (obrigatório e não pode ser futura)
-    if (!form.dataNota) {
-      newErrors.dataNota = "Data da nota é obrigatória";
-    } else {
-      const dataNotaDate = new Date(form.dataNota);
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0);
-      if (dataNotaDate > hoje) {
-        newErrors.dataNota = "Data da nota não pode ser futura";
-      }
-    }
-
-    // Data da Ocorrência (obrigatório e não pode ser futura)
-    if (!form.dataOcorrencia) {
-      newErrors.dataOcorrencia = "Data da ocorrência é obrigatória";
-    } else {
-      const dataOcorrenciaDate = new Date(form.dataOcorrencia);
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0);
-      if (dataOcorrenciaDate > hoje) {
-        newErrors.dataOcorrencia = "Data da ocorrência não pode ser futura";
-      }
-
-      // Validar se data da ocorrência não é anterior à data da nota
-      if (form.dataNota) {
-        const dataNotaDate = new Date(form.dataNota);
-        if (dataOcorrenciaDate < dataNotaDate) {
-          newErrors.dataOcorrencia =
-            "Data da ocorrência não pode ser anterior à data da nota";
-        }
-      }
-    }
-
-    // Transportadora (obrigatório)
-    if (!form.transportadora.trim()) {
-      newErrors.transportadora = "Transportadora é obrigatória";
-    } else if (form.transportadora.trim().length < 3) {
-      newErrors.transportadora =
-        "Nome da transportadora deve ter pelo menos 3 caracteres";
-    }
-
-    // Cliente (obrigatório)
-    if (!form.cliente.trim()) {
-      newErrors.cliente = "Cliente é obrigatório";
-    } else if (form.cliente.trim().length < 3) {
-      newErrors.cliente = "Nome do cliente deve ter pelo menos 3 caracteres";
-    }
-
-    // Destino (obrigatório)
-    if (!form.destino.trim()) {
-      newErrors.destino = "Destino é obrigatório";
-    } else if (form.destino.trim().length < 3) {
-      newErrors.destino = "Destino deve ter pelo menos 3 caracteres";
-    }
-
-    // Estado (obrigatório)
-    if (!form.estado || form.estado.trim() === "") {
-      newErrors.estado = "Estado é obrigatório";
-    }
-
-    // Número do Pedido (obrigatório)
-    if (!form.pedido.trim()) {
-      newErrors.pedido = "Número do pedido é obrigatório";
-    }
-
-    // Descrição da Ocorrência (obrigatório)
-    if (!form.ocorrencia.trim()) {
-      newErrors.ocorrencia = "Descrição da ocorrência é obrigatória";
-    } else if (form.ocorrencia.trim().length < 10) {
-      newErrors.ocorrencia = "Descrição deve ter pelo menos 10 caracteres";
-    }
-
-    // Responsável pela análise (obrigatório)
-    if (!form.pendencia.trim()) {
-      newErrors.pendencia = "Responsável pela análise é obrigatório";
-    }
-
-    // Status Cliente (obrigatório)
-    if (!form.statusCliente || form.statusCliente.trim() === "") {
-      newErrors.statusCliente = "Status do cliente é obrigatório";
-    }
-
-    // Status Transportadora (obrigatório)
-    if (!form.statusTransportadora || form.statusTransportadora.trim() === "") {
-      newErrors.statusTransportadora = "Status da transportadora é obrigatório";
-    }
-
-    // ===== VALIDAÇÕES OPCIONAIS (SE PREENCHIDAS) =====
-
-    // Última Ocorrência (se preenchida, não pode ser futura)
-    if (form.ultimaOcorrencia) {
-      const ultimaOcorrenciaDate = new Date(form.ultimaOcorrencia);
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0);
-      if (ultimaOcorrenciaDate > hoje) {
-        newErrors.ultimaOcorrencia = "Última ocorrência não pode ser futura";
-      }
-    }
-
-    // Observações (se preenchidas, validar tamanho mínimo)
-    if (form.obs.trim() && form.obs.trim().length < 5) {
-      newErrors.obs = "Observações devem ter pelo menos 5 caracteres";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const trackingNumero = Number(String(form.tracking).match(/\d+/)?.[0] || 0);
-
-    if (!validateForm()) {
-      // Scroll para o primeiro erro
-      const firstErrorField = Object.keys(errors)[0];
-      const element = document.getElementsByName(firstErrorField)[0];
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
-        element.focus();
-      }
-      return;
-    }
+    const dias = calculateDaysOpen(form.dataNota, form.ultimaOcorrencia);
 
     const estadoNome = ESTADO_SIGLA_PARA_NOME[form.estado] || form.estado;
 
-    // Regra da coluna T (Status do Excel)
-    const statusExcelValue =
+    const statusExcel =
       ["RESOLVIDO", "FALTA DE PROVAS"].includes(
         form.statusCliente?.toUpperCase()
       ) &&
@@ -370,8 +203,8 @@ export default function OccurrenceModal({
     onSubmit({
       ...form,
       estado: estadoNome,
-      status: statusExcelValue,
-      tracking: trackingNumero > 0 ? `${trackingNumero}` : "",
+      status: statusExcel,
+      tracking: dias > 0 ? `${dias}` : "",
     });
 
     setForm(emptyForm);
