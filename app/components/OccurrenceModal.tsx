@@ -103,31 +103,163 @@ export default function OccurrenceModal({
       return `${y}-${m}-${d}`;
     }
     const parsed = new Date(date);
-    return isNaN(parsed.getTime())
-      ? ""
-      : parsed.toISOString().split("T")[0];
+    return isNaN(parsed.getTime()) ? "" : parsed.toISOString().split("T")[0];
   };
 
- // ✅ FUNÇÃO CORRIGIDA: Compara data da nota com última ocorrência
-const calculateDaysOpen = (
-  dataNota?: string,
-  ultimaOcorrencia?: string
-): number => {
-  // Se não houver última ocorrência, usa a data atual
-  // Se não houver data da nota, retorna 0
-  if (!dataNota) return 0;
+  // ✅ FUNÇÃO CORRIGIDA: Compara data da nota com última ocorrência
+  const calculateDaysOpen = (
+    dataNota?: string,
+    ultimaOcorrencia?: string
+  ): number => {
+    // Se não houver última ocorrência, usa a data atual
+    // Se não houver data da nota, retorna 0
+    if (!dataNota) return 0;
 
-  const inicio = new Date(dataNota);
-  const fim = ultimaOcorrencia ? new Date(ultimaOcorrencia) : new Date();
+    const inicio = new Date(dataNota);
+    const fim = ultimaOcorrencia ? new Date(ultimaOcorrencia) : new Date();
 
-  inicio.setHours(0, 0, 0, 0);
-  fim.setHours(0, 0, 0, 0);
+    inicio.setHours(0, 0, 0, 0);
+    fim.setHours(0, 0, 0, 0);
 
-  const diffMs = fim.getTime() - inicio.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffMs = fim.getTime() - inicio.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  return diffDays >= 0 ? diffDays : 0;
-};
+    return diffDays >= 0 ? diffDays : 0;
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    // Nota Fiscal
+    if (!form.nota.trim()) {
+      newErrors.nota = "Nota fiscal é obrigatória";
+    } else if (form.nota.trim().length < 3) {
+      newErrors.nota = "Nota fiscal deve ter pelo menos 3 caracteres";
+    }
+
+    // Volumes
+    if (!form.volumes) {
+      newErrors.volumes = "Volumes é obrigatório";
+    } else if (isNaN(Number(form.volumes)) || Number(form.volumes) <= 0) {
+      newErrors.volumes = "Volumes deve ser um número maior que zero";
+    }
+
+    // Tipo
+    if (!form.tipo) {
+      newErrors.tipo = "Tipo de ocorrência é obrigatório";
+    }
+
+    // Solicitante
+    if (!form.solicitante.trim()) {
+      newErrors.solicitante = "Solicitante é obrigatório";
+    } else if (form.solicitante.trim().length < 3) {
+      newErrors.solicitante = "Solicitante deve ter pelo menos 3 caracteres";
+    }
+
+    // Data da Nota
+    if (!form.dataNota) {
+      newErrors.dataNota = "Data da nota é obrigatória";
+    } else {
+      const dataNota = new Date(form.dataNota);
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      if (dataNota > hoje) {
+        newErrors.dataNota = "Data da nota não pode ser futura";
+      }
+    }
+
+    // Data da Ocorrência
+    if (!form.dataOcorrencia) {
+      newErrors.dataOcorrencia = "Data da ocorrência é obrigatória";
+    } else {
+      const dataOcorrencia = new Date(form.dataOcorrencia);
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+
+      if (dataOcorrencia > hoje) {
+        newErrors.dataOcorrencia = "Data da ocorrência não pode ser futura";
+      }
+
+      if (form.dataNota) {
+        const dataNota = new Date(form.dataNota);
+        if (dataOcorrencia < dataNota) {
+          newErrors.dataOcorrencia =
+            "Data da ocorrência não pode ser anterior à data da nota";
+        }
+      }
+    }
+
+    // Última Ocorrência (opcional)
+    if (form.ultimaOcorrencia) {
+      const ultima = new Date(form.ultimaOcorrencia);
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      if (ultima > hoje) {
+        newErrors.ultimaOcorrencia = "Última ocorrência não pode ser futura";
+      }
+    }
+
+    // Transportadora
+    if (!form.transportadora.trim()) {
+      newErrors.transportadora = "Transportadora é obrigatória";
+    } else if (form.transportadora.trim().length < 3) {
+      newErrors.transportadora =
+        "Transportadora deve ter pelo menos 3 caracteres";
+    }
+
+    // Cliente
+    if (!form.cliente.trim()) {
+      newErrors.cliente = "Cliente é obrigatório";
+    } else if (form.cliente.trim().length < 3) {
+      newErrors.cliente = "Cliente deve ter pelo menos 3 caracteres";
+    }
+
+    // Destino
+    if (!form.destino.trim()) {
+      newErrors.destino = "Destino é obrigatório";
+    } else if (form.destino.trim().length < 3) {
+      newErrors.destino = "Destino deve ter pelo menos 3 caracteres";
+    }
+
+    // Estado
+    if (!form.estado) {
+      newErrors.estado = "Estado é obrigatório";
+    }
+
+    // Pedido
+    if (!form.pedido.trim()) {
+      newErrors.pedido = "Número do pedido é obrigatório";
+    }
+
+    // Responsável
+    if (!form.pendencia.trim()) {
+      newErrors.pendencia = "Responsável pela análise é obrigatório";
+    }
+
+    // Status
+    if (!form.statusCliente) {
+      newErrors.statusCliente = "Status do cliente é obrigatório";
+    }
+
+    if (!form.statusTransportadora) {
+      newErrors.statusTransportadora = "Status da transportadora é obrigatório";
+    }
+
+    // Ocorrência
+    if (!form.ocorrencia.trim()) {
+      newErrors.ocorrencia = "Descrição da ocorrência é obrigatória";
+    } else if (form.ocorrencia.trim().length < 10) {
+      newErrors.ocorrencia = "Descrição deve ter pelo menos 10 caracteres";
+    }
+
+    // Observações (opcional)
+    if (form.obs && form.obs.trim().length > 0 && form.obs.trim().length < 5) {
+      newErrors.obs = "Observações devem ter pelo menos 5 caracteres";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   useEffect(() => {
     if (editingOccurrence) {
@@ -185,6 +317,16 @@ const calculateDaysOpen = (
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      const firstErrorField = Object.keys(errors)[0];
+      const element = document.getElementsByName(firstErrorField)[0];
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        element.focus();
+      }
+      return;
+    }
 
     const dias = calculateDaysOpen(form.dataNota, form.ultimaOcorrencia);
 
