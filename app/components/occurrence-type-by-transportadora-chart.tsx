@@ -34,12 +34,11 @@ export function OccurrenceTypeByTransportadoraChart({ data, year }: Props) {
 
   console.log("transportadoras", data);
 
-const hasData =
+  const hasData =
     data &&
     data.some((item) =>
-      Object.entries(item.transportadoras ?? {}).some(
-        ([_, tipos]: any) =>
-          Object.values(tipos ?? {}).some((valor: any) => Number(valor) > 0)
+      Object.entries(item.transportadoras ?? {}).some(([_, tipos]: any) =>
+        Object.values(tipos ?? {}).some((valor: any) => Number(valor) > 0)
       )
     );
 
@@ -121,7 +120,11 @@ const hasData =
               fontSize={12}
             />
 
-            <YAxis stroke="oklch(0.55 0.015 240)" fontSize={12} />
+            <YAxis
+              stroke="oklch(0.55 0.015 240)"
+              fontSize={12}
+              tickFormatter={(value) => `${(value * 10).toFixed(0)}%`}
+            />
 
             <Tooltip
               wrapperStyle={{ pointerEvents: "auto" }}
