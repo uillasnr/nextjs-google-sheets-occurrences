@@ -12,12 +12,29 @@ export default function Filtros({
   busca: string;
   setBusca: (b: string) => void;
 }) {
-  const filtros: { valor: Filtro; label: string; cor: string }[] = [
-    { valor: "PENDENTE", label: "Pendente", cor: "amber" },
-    { valor: "EXPEDIDO", label: "Expedido ", cor: "emerald" },
-    { valor: "TODOS", label: "Todas", cor: "blue" },
-  ];
+  const filtros = [
+  {
+    valor: "PENDENTE",
+    label: "Pendente",
+    classe:
+      "bg-gradient-to-r from-amber-600 to-amber-800 shadow-amber-500/30",
+  },
+  {
+    valor: "EXPEDIDO",
+    label: "Expedido",
+    classe:
+      "bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-emerald-500/30",
+  },
+  {
+    valor: "TODOS",
+    label: "Todas",
+    classe:
+      "bg-gradient-to-r from-blue-500 to-blue-600 shadow-blue-500/30",
+  },
+] as const;
 
+
+  
   return (
     <div className="space-y-4">
       {/* BUSCA */}
@@ -41,22 +58,24 @@ export default function Filtros({
           Filtrar por:
         </div>
         
-        <div className="flex flex-wrap gap-2">
-          {filtros.map(({ valor, label, cor }) => (
-            <button
-              key={valor}
-              onClick={() => setFiltro(valor)}
-              className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 hover:scale-105 active:scale-95
-                ${
-                  filtro === valor
-                    ? `bg-gradient-to-r from-${cor}-500 to-${cor}-600 text-white shadow-lg shadow-${cor}-500/30`
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-                }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+       <div className="flex flex-wrap gap-2">
+  {filtros.map(({ valor, label, classe }) => (
+    <button
+      key={valor}
+      onClick={() => setFiltro(valor)}
+      className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200
+        hover:scale-105 active:scale-95
+        ${
+          filtro === valor
+            ? `${classe} text-white shadow-lg`
+            : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+        }`}
+    >
+      {label}
+    </button>
+  ))}
+</div>
+
       </div>
     </div>
   );
