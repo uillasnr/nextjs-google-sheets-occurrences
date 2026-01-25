@@ -1,7 +1,7 @@
 import { AlertCircle } from "lucide-react";
 
 interface DateInputProps {
-  label: string;
+  label?: string;
   name: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
