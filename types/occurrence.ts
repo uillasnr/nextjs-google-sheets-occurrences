@@ -19,6 +19,10 @@ export type Occurrence = {
   obs: string;
   pendencia: string;
   status: string;
+  recebedorNome?: string;
+  recebedorCpf?: string;
+  recebedorPlaca?: string;
+  dataRetirada?: string;
 };
 
 export const TIPO_OCORRENCIA_MAP: Record<string, string> = {

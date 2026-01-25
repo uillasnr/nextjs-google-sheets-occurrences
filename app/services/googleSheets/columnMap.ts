@@ -21,4 +21,8 @@ export const COLUMN_MAP: (keyof Occurrence)[] = [
   "obs",                 // R
   "pendencia",           // S
   "status",              // T
+  "recebedorNome",       // U
+  "recebedorCpf",        // V
+  "recebedorPlaca",      // W
+  "dataRetirada",        // X
 ];

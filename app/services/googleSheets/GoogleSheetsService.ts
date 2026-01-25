@@ -37,6 +37,10 @@ export class GoogleSheetsService {
         obs: row[17] || "",
         pendencia: row[18] || "",
         status: normalizarStatus(row[19], row[19], row[14], row[15]),
+        recebedorNome: row[20] || "",
+        recebedorCpf: row[21] || "",
+        recebedorPlaca: row[22] || "",
+        dataRetirada: row[23] || "",
       }));
   }
 
@@ -77,7 +81,7 @@ export class GoogleSheetsService {
 
     await sheets.spreadsheets.values.update({
       spreadsheetId: SPREADSHEET_ID,
-      range: `'${sheet}'!A${rowNumber}:T${rowNumber}`,
+      range: `'${sheet}'!A${rowNumber}:X${rowNumber}`,
       valueInputOption: "RAW",
       requestBody: { values: [updatedRow] },
     });

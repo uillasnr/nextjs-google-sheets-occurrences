@@ -48,6 +48,10 @@ const emptyForm: Occurrence = {
   obs: "",
   pendencia: "",
   status: "Em analise",
+  recebedorNome: "",
+  recebedorCpf: "",
+  recebedorPlaca: "",
+  dataRetirada: "",
 };
 
 const ESTADO_SIGLA_PARA_NOME: Record<string, string> = {

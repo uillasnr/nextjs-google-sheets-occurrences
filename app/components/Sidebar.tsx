@@ -1,7 +1,8 @@
 "use client";
 
-import { BarChart3, Search, Truck, X } from "lucide-react";
+import { BarChart3, Search, Truck, X, ClipboardCheck } from "lucide-react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useState } from "react";
 import SearchModal from "./SearchModal";
 import { Occurrence } from "@/types/occurrence";
@@ -95,6 +96,17 @@ export default function Sidebar({
             <BarChart3 className="w-5 h-5" />
             Dashboard
           </button>
+          
+          {/* Expedição */}
+          <Link
+            href="/expedicao"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg
+              bg-blue-600 hover:bg-blue-700 text-white
+              transition-colors shadow-md text-sm"
+          >
+            <ClipboardCheck className="w-5 h-5" />
+            Expedição
+          </Link>
 
           {/* Buscar Ocorrências (opcional) */}
           <button
