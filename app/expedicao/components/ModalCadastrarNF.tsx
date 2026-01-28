@@ -5,6 +5,7 @@ import Modal from "./Modal";
 import { FileText, User, Package, Save, Calendar } from "lucide-react";
 import { useState } from "react";
 import { DateInput } from "@/components/DateInput";
+import { formatDateBR } from "@/lib/formatDate";
 
 interface Props {
   onClose: () => void;
@@ -26,7 +27,7 @@ export default function ModalCadastrarNF({ onClose, onSave }: Props) {
       id: crypto.randomUUID(),
       nota: Number(formData.nota),
       cliente: formData.cliente,
-      dataNota: formData.dataNota, // TODO: adicionar campo de data da nota
+      dataNota: formatDateBR(formData.dataNota),
       volumes: Number(formData.volumes),
       status: "PENDENTE",
     };
@@ -81,50 +82,46 @@ export default function ModalCadastrarNF({ onClose, onSave }: Props) {
           />
         </div>
 
- <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
-  {/* VOLUMES */}
-  <div>
-    <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-      <Package className="w-4 h-4 text-blue-500" />
-      Quantidade de Volumes
-    </label>
-    <input
-      required
-      type="number"
-      min={1}
-      step={1}
-      value={formData.volumes}
-      onChange={(e) =>
-        setFormData({ ...formData, volumes: e.target.value })
-      }
-      placeholder="Ex: 10"
-      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-xl
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 items-center">
+          {/* VOLUMES */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+              <Package className="w-4 h-4 text-blue-500" />
+              Quantidade de Volumes
+            </label>
+            <input
+              required
+              type="number"
+              min={1}
+              step={1}
+              value={formData.volumes}
+              onChange={(e) =>
+                setFormData({ ...formData, volumes: e.target.value })
+              }
+              placeholder="Ex: 10"
+              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-xl
         text-gray-900 dark:text-white placeholder-gray-400
         focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-    />
-  </div>
+            />
+          </div>
 
-  {/* DATA DA NOTA */}
-<div className="flex-1 flex flex-col">
-  <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 ">
-    <Calendar className="w-4 h-4 text-blue-500" />
-    Data da Nota
-  </label>
+          {/* DATA DA NOTA */}
+          <div className="flex-1 flex flex-col">
+            <label className="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 ">
+              <Calendar className="w-4 h-4 text-blue-500" />
+              Data da Nota
+            </label>
 
-  <DateInput
-    name="dataNota"
-    value={formData.dataNota}
-    onChange={(e) =>
-      setFormData({ ...formData, dataNota: e.target.value })
-    }
-  
-    max={new Date().toISOString().split("T")[0]}
-  />
-</div>
-
-</div>
-
-     
+            <DateInput
+              name="dataNota"
+              value={formData.dataNota}
+              onChange={(e) =>
+                setFormData({ ...formData, dataNota: e.target.value })
+              }
+              max={new Date().toISOString().split("T")[0]}
+            />
+          </div>
+        </div>
 
         {/* BOTÕES */}
         <div className="flex gap-3 pt-4">

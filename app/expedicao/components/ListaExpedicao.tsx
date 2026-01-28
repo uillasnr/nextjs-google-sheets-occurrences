@@ -1,3 +1,4 @@
+import { formatDateBR } from "@/lib/formatDate";
 import { Expedicao } from "@/types/Expedicao";
 
 export default function ListaExpedicao({
@@ -7,6 +8,7 @@ export default function ListaExpedicao({
   lista: Expedicao[];
   onExpedir: (item: Expedicao) => void;
 }) {
+  console.log("Renderizando ListaExpedicao com lista:", lista);
   return (
     <div className="space-y-3">
       {lista.map((item) => (
@@ -19,9 +21,11 @@ export default function ListaExpedicao({
               NF {item.nota}
             </p>
             <p className="text-sm text-gray-500">{item.cliente}</p>
-             <p className="text-sm text-gray-500">Data da nota: {item.dataNota}</p>
-            {item.status === "EXPEDIDO" && item.data && (
-              <p className="text-xs text-gray-400">{item.data}</p>
+            <p className="text-sm text-gray-500">
+              Data da nota: {formatDateBR(item.dataNota)}
+            </p>
+            {item.status === "EXPEDIDO" && item.dataExpedicao && (
+              <p className="text-xs text-gray-400">{item.dataExpedicao}</p>
             )}
 
             {item.status === "EXPEDIDO" && (
