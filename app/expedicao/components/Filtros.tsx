@@ -36,9 +36,9 @@ export default function Filtros({
 
   
   return (
-    <div className="space-y-4">
+    <div className="border border-gray-600 dark:border-gray-600 rounded-2xl p-5 space-y-4 shadow-sm">
       {/* BUSCA */}
-      <div className="relative">
+      <div className="relative ">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
           <Search className="h-5 w-5 text-gray-400" strokeWidth={2.5} />
         </div>
@@ -53,7 +53,7 @@ export default function Filtros({
 
       {/* FILTROS */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        <div className="flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+        <div className="flex items-center gap-2 text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
           <Filter className="w-4 h-4" />
           Filtrar por:
         </div>
