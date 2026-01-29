@@ -1,22 +1,23 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Package, Plus, FileText } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { FileText } from "lucide-react";
 
 import Filtros from "./components/Filtros";
 import ListaExpedicao from "./components/ListaExpedicao";
 import ModalCadastrarNF from "./components/ModalCadastrarNF";
 import ModalExpedir from "./components/ModalExpedir";
-import Dashboard from "./components/Dashboard";
+import Sidebar from "@/app/components/Sidebar";
 
-import {
-  CadastrationExpedicao,
-  Expedicao,
-  Filtro,
-} from "@/types/Expedicao";
+import { CadastrationExpedicao, Expedicao, Filtro } from "@/types/Expedicao";
 import HeaderExpedicao from "./components/HeaderExpedicao";
+import StatusCard from "./components/StatusCard";
+import DashboardExpedicao from "./components/Dashboard";
+import Loading from "@/components/Loading";
 
 export default function ExpedicaoPage() {
+  const router = useRouter();
   const [lista, setLista] = useState<Expedicao[]>([]);
   const [filtro, setFiltro] = useState<Filtro>("PENDENTE");
   const [busca, setBusca] = useState("");
@@ -36,16 +37,14 @@ export default function ExpedicaoPage() {
   }, []);
 
   const filtrados = useMemo(() => {
-
     return lista.filter((item) => {
-  const filtroOK = filtro === "TODOS" || item.status === filtro;
+      const filtroOK = filtro === "TODOS" || item.status === filtro;
 
-const buscaOK =
-  String(item.nota).toLowerCase().includes(busca.toLowerCase()) ||
-  String(item.cliente).toLowerCase().includes(busca.toLowerCase());
+      const buscaOK =
+        String(item.nota).toLowerCase().includes(busca.toLowerCase()) ||
+        String(item.cliente).toLowerCase().includes(busca.toLowerCase());
 
-return filtroOK && buscaOK;
-
+      return filtroOK && buscaOK;
     });
   }, [lista, filtro, busca]);
 
@@ -72,26 +71,51 @@ return filtroOK && buscaOK;
 
     const salvo: Expedicao = await res.json();
 
-    setLista((prev) =>
-      prev.map((i) => (i.id === salvo.id ? salvo : i))
-    );
+    setLista((prev) => prev.map((i) => (i.id === salvo.id ? salvo : i)));
   };
+
+  // ⛔ BLOQUEIA A TELA ENQUANTO CARREGA
+  if (carregando) {
+    return <Loading isOpen text="Carregando controle de Retira" />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       {/* HEADER */}
       <HeaderExpedicao onCadastrar={() => setModalCadastro(true)} />
 
-      {/* CONTEÚDO */}
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-        <Dashboard lista={lista} filtroAtual={filtro} setFiltro={setFiltro} />
+      {/* SIDEBAR */}
+      <Sidebar
+        goToHome={() => router.push("/")}
+        goToDashboard={() => {}}
+        onSearchNF={() => false}
+        occurrences={[]}
+        sheet="SP"
+      />
 
-        <Filtros
-          filtro={filtro}
-          setFiltro={setFiltro}
-          busca={busca}
-          setBusca={setBusca}
-        />
+      {/* CONTEÚDO */}
+      <div className="max-w-7xl mx-auto px-6 py-8 ">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* COLUNA ESQUERDA */}
+          <div className="lg:col-span-2 space-y-6">
+            <StatusCard
+              lista={lista}
+              filtroAtual={filtro}
+              setFiltro={setFiltro}
+            />
+            <Filtros
+              filtro={filtro}
+              setFiltro={setFiltro}
+              busca={busca}
+              setBusca={setBusca}
+            />
+          </div>
+
+          {/* COLUNA DIREITA */}
+          <div className="lg:col-span-1">
+            <DashboardExpedicao lista={lista} />
+          </div>
+        </div>
 
         {carregando ? (
           <div className="flex justify-center py-20">
