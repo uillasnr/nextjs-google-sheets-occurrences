@@ -1,104 +1,98 @@
 "use client";
 
-import { Expedicao, Filtro } from "@/types/Expedicao";
+import { CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartContainer } from "@/components/ui/chart";
+import { useMemo } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
 
-import { Clock, CheckCircle2, Layers } from "lucide-react";
-import React from "react";
+type Expedicao = {
+  nota: string | number;
+  status: string;
+  dataNota: string; // ← DATA VEM DA NOTA
+};
 
+export default function DashboardExpedicao({ lista }: { lista: Expedicao[] }) {
+  const dadosGrafico = useMemo(() => {
+    const meses = [
+      "Jan","Fev","Mar","Abr","Mai","Jun",
+      "Jul","Ago","Set","Out","Nov","Dez",
+    ].map((mes) => ({ mes, total: 0 }));
 
-interface DashboardProps {
-  lista: Expedicao[];
-  filtroAtual: Filtro;
-  setFiltro: (f: Filtro) => void;
-}
+    lista.forEach((item) => {
+      if (!item.dataNota) return;
 
-export default function Dashboard({
-  lista,
-  filtroAtual,
-  setFiltro,
-}: DashboardProps) {
-  const pendentes = lista.filter((i) => i.status === "PENDENTE").length;
-  const expedido = lista.filter((i) => i.status === "EXPEDIDO").length;
-  const total = lista.length;
+      const statusOk = item.status?.toUpperCase().trim() === "EXPEDIDO";
+      if (!statusOk) return;
 
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-      <StatCard
-        label="Pendentes"
-        value={pendentes}
-        icon={Clock}
-        bgColor="bg-amber-100"
-        iconColor="text-amber-600"
-        active={filtroAtual === "PENDENTE"}
-        onClick={() =>
-          setFiltro(filtroAtual === "PENDENTE" ? "TODOS" : "PENDENTE")
-        }
-      />
+      // Converter data BR (dd/mm/yyyy)
+      const [dia, mes, ano] = item.dataNota.split("/");
+      const data = new Date(`${ano}-${mes}-${dia}`);
 
-      <StatCard
-        label="Expedido"
-        value={expedido}
-        icon={CheckCircle2}
-        bgColor="bg-emerald-100"
-        iconColor="text-emerald-600"
-        active={filtroAtual === "EXPEDIDO"}
-        onClick={() =>
-          setFiltro(filtroAtual === "EXPEDIDO" ? "TODOS" : "EXPEDIDO")
-        }
-      />
+      if (isNaN(data.getTime())) return;
 
-      <StatCard
-        label="Total"
-        value={total}
-        icon={Layers}
-        bgColor="bg-blue-100"
-        iconColor="text-blue-600"
-        active={filtroAtual === "TODOS"}
-        onClick={() => setFiltro("TODOS")}
-      />
-    </div>
-  );
-}
+      const mesIndex = data.getMonth();
 
-interface StatCardProps {
-  label: string;
-  value: number;
-  icon: any;
-  bgColor: string;
-  iconColor: string;
-  active: boolean;
-  onClick: () => void;
-}
+      // ✅ CONTA 1 NOTA
+      meses[mesIndex].total += 1;
+    });
 
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-  bgColor,
-  iconColor,
-  active,
-  onClick,
-}: StatCardProps) {
-  return (
-    <button
-      onClick={onClick}
-      className={`bg-white dark:bg-gray-800 dark:text-white rounded-xl shadow-sm border p-4 text-left transition
-        ${
-          active
-            ? "border-blue-600 ring-2 ring-blue-200"
-            : "border-slate-200 hover:border-blue-300"
-        }`}
-    >
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium">{label}</p>
-          <p className={`text-2xl font-bold mt-1 ${iconColor}`}>{value}</p>
-        </div>
+    return meses;
+  }, [lista]);
 
-        <div className={`${bgColor} p-3 rounded-xl`}>
-          <Icon className={`w-6 h-6 ${iconColor}`} />
-        </div>
+  if (dadosGrafico.every((m) => m.total === 0)) {
+    return (
+      <div className="flex h-[180px] items-center justify-center text-gray-500 dark:text-gray-400">
+        Nenhuma nota expedida ainda.
       </div>
-    </button>
+    );
+  }
+
+  return (
+    <div className="bg-white dark:bg-gray-900 p-4 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm w-full">
+      <CardHeader className="text-center">
+        <CardTitle className="dark:text-gray-100">
+          Notas expedidas por mês
+        </CardTitle>
+      </CardHeader>
+
+      <div className="w-full h-[180px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <ChartContainer config={{ total: { label: "Notas" } }}>
+            <BarChart
+              data={dadosGrafico}
+              margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.25 0.012 240)" />
+
+              <XAxis
+                dataKey="mes"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={10}
+                fontSize={12}
+              />
+
+              <YAxis width={30} fontSize={12} />
+
+              <Tooltip />
+
+              <Bar
+                dataKey="total"
+                fill="oklch(0.65 0.24 264)"
+                radius={[8, 8, 0, 0]}
+              />
+            </BarChart>
+          </ChartContainer>
+        </ResponsiveContainer>
+      </div>
+    </div>
   );
 }
