@@ -1,6 +1,7 @@
 "use client";
 
-import { BarChart3, Search, Truck, X } from "lucide-react";
+import { BarChart3, Search, Truck, X, Package } from "lucide-react";
+import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import SearchModal from "./SearchModal";
@@ -22,6 +23,7 @@ export default function Sidebar({
   occurrences,
   sheet,
 }: SidebarProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -69,7 +71,7 @@ export default function Sidebar({
           {/* Tela inicial */}
           <button
             onClick={() => {
-              goToHome(); // Volta para a lista de cards
+              router.push("/");
               setOpen(false);
             }}
             className="flex items-center gap-3 px-4 py-3 rounded-lg
@@ -81,10 +83,25 @@ export default function Sidebar({
             Tela inicial
           </button>
 
+          {/* Expedição */}
+          <button
+            onClick={() => {
+              router.push("/expedicao");
+              setOpen(false);
+            }}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg
+              bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700
+              hover:bg-gray-300 dark:hover:bg-gray-700
+              transition-colors shadow-md text-sm dark:text-white"
+          >
+            <Package className="w-5 h-5" />
+            Expedição
+          </button>
+
           {/* Dashboard */}
           <button
             onClick={() => {
-              goToDashboard(); // Mostra o Dashboard
+              goToDashboard(); // Mostra o Dashboard na página atual
               setOpen(false);
             }}
             className="flex items-center gap-3 px-4 py-3 rounded-lg
@@ -115,8 +132,6 @@ export default function Sidebar({
           <div className="pb-4 border-b border-t pt-3 border-gray-200 dark:border-gray-700">
             <PDFReportButton occurrences={occurrences} sheet={sheet} />
           </div>
-
-          {/* Theme Toggle */}
           <ThemeToggle />
         </div>
       </aside>
