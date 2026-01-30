@@ -177,7 +177,9 @@ export default function ModalExpedir({
                 maxLength={8}
                 onChange={(e) => setPlaca(formatarPlaca(e.target.value))}
                 placeholder="ABC-1234"
-                className="w-full px-4 py-3 text-gray-700 dark:text-gray-300  rounded-xl border border-gray-600 bg-gray-50 dark:bg-gray-900   focus:outline-none focus:ring-2 focus:ring-blue-500 transition outline-none uppercase"
+                className="w-full px-4 py-3 text-gray-700 dark:text-gray-300  rounded-xl border
+                 border-gray-600 bg-gray-50 dark:bg-gray-900 
+                   focus:outline-none focus:ring-2 focus:ring-blue-500 transition outline-none uppercase"
               />
             </div>
           </div>
@@ -196,7 +198,7 @@ export default function ModalExpedir({
 
             <button
               type="submit"
-              className="flex-1 px-4  text-gray-700 dark:text-gray-300 text-sm py-2
+              className="flex-1 px-4  text-white text-sm py-2
                bg-gradient-to-r from-blue-600 to-blue-700
               hover:from-blue-700 hover:to-blue-800  font-bold rounded-xl
               shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition"
