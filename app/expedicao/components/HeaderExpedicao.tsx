@@ -22,7 +22,7 @@ export default function HeaderExpedicao({
               Controle de Retira
             </h1>
             <p className="text-sm text-gray-500">
-              Gestão de retirada e expedição de mercadorias
+              Expedição de mercadorias
             </p>
           </div>
         </div>
