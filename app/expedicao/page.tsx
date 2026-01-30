@@ -9,12 +9,13 @@ import ListaExpedicao from "./components/ListaExpedicao";
 import ModalCadastrarNF from "./components/ModalCadastrarNF";
 import ModalExpedir from "./components/ModalExpedir";
 import Sidebar from "@/app/components/Sidebar";
-
-import { CadastrationExpedicao, Expedicao, Filtro } from "@/types/Expedicao";
 import HeaderExpedicao from "./components/HeaderExpedicao";
 import StatusCard from "./components/StatusCard";
 import DashboardExpedicao from "./components/Dashboard";
 import Loading from "@/components/Loading";
+import Romaneio from "./components/Romaneio";
+
+import { CadastrationExpedicao, Expedicao, Filtro } from "@/types/Expedicao";
 
 export default function ExpedicaoPage() {
   const router = useRouter();
@@ -24,67 +25,54 @@ export default function ExpedicaoPage() {
   const [modalCadastro, setModalCadastro] = useState(false);
   const [modalExpedir, setModalExpedir] = useState<Expedicao | null>(null);
   const [carregando, setCarregando] = useState(true);
+  const [abrirRomaneio, setAbrirRomaneio] = useState(false);
 
   useEffect(() => {
     setCarregando(true);
     fetch("/api/expedicao")
       .then((r) => r.json())
-      .then((data: Expedicao[]) => {
-        setLista(data);
-        setCarregando(false);
-      })
-      .catch(() => setCarregando(false));
+      .then((data: Expedicao[]) => setLista(data))
+      .finally(() => setCarregando(false));
   }, []);
 
   const filtrados = useMemo(() => {
     return lista.filter((item) => {
       const filtroOK = filtro === "TODOS" || item.status === filtro;
-
       const buscaOK =
         String(item.nota).toLowerCase().includes(busca.toLowerCase()) ||
         String(item.cliente).toLowerCase().includes(busca.toLowerCase());
-
       return filtroOK && buscaOK;
     });
   }, [lista, filtro, busca]);
 
-  // ✅ CADASTRAR NF
   const cadastrarNF = async (novo: CadastrationExpedicao) => {
     const res = await fetch("/api/expedicao", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(novo),
     });
-
     const criado: Expedicao = await res.json();
-
     setLista((prev) => [criado, ...prev]);
   };
 
-  // ✅ EXPEDIR NF
   const expedirNF = async (atualizado: Expedicao) => {
     const res = await fetch(`/api/expedicao/${atualizado.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(atualizado),
     });
-
     const salvo: Expedicao = await res.json();
-
     setLista((prev) => prev.map((i) => (i.id === salvo.id ? salvo : i)));
   };
 
-  // ⛔ BLOQUEIA A TELA ENQUANTO CARREGA
   if (carregando) {
     return <Loading isOpen text="Carregando controle de Retira" />;
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
-      {/* HEADER */}
       <HeaderExpedicao onCadastrar={() => setModalCadastro(true)} />
 
-      {/* SIDEBAR */}
       <Sidebar
         goToHome={() => router.push("/")}
         goToDashboard={() => {}}
@@ -93,10 +81,8 @@ export default function ExpedicaoPage() {
         sheet="SP"
       />
 
-      {/* CONTEÚDO */}
-      <div className="max-w-7xl mx-auto px-6 py-8 ">
+      <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* COLUNA ESQUERDA */}
           <div className="lg:col-span-2 space-y-6">
             <StatusCard
               lista={lista}
@@ -105,22 +91,40 @@ export default function ExpedicaoPage() {
             />
             <Filtros
               filtro={filtro}
-              setFiltro={setFiltro}
+              setFiltro={(f) => {
+                if (!abrirRomaneio) setFiltro(f);
+              }}
               busca={busca}
-              setBusca={setBusca}
+              setBusca={(b) => {
+                if (!abrirRomaneio) setBusca(b);
+              }}
+              onAbrirRomaneio={() => {
+                setAbrirRomaneio(true);
+                setBusca("");
+                setFiltro("TODOS");
+              }}
+              romaneioAtivo={abrirRomaneio}
             />
           </div>
 
-          {/* COLUNA DIREITA */}
           <div className="lg:col-span-1">
             <DashboardExpedicao lista={lista} />
           </div>
         </div>
 
-        {carregando ? (
-          <div className="flex justify-center py-20">
-            <div className="animate-spin h-10 w-10 border-4 border-blue-500 border-t-transparent rounded-full" />
-          </div>
+        {abrirRomaneio ? (
+          <Romaneio
+            lista={lista}
+            onClose={() => setAbrirRomaneio(false)}
+            onConfirm={(ids) => {
+              setLista((prev) =>
+                prev.map((nf) =>
+                  ids.includes(nf.id) ? { ...nf, status: "EXPEDIDO" } : nf,
+                ),
+              );
+              setAbrirRomaneio(false);
+            }}
+          />
         ) : filtrados.length === 0 ? (
           <div className="text-center py-20">
             <FileText className="mx-auto h-12 w-12 text-gray-400" />
@@ -134,7 +138,6 @@ export default function ExpedicaoPage() {
         )}
       </div>
 
-      {/* MODAIS */}
       {modalCadastro && (
         <ModalCadastrarNF
           onClose={() => setModalCadastro(false)}
