@@ -1,5 +1,5 @@
-export type Status = "PENDENTE" | "EXPEDIDO";
-export type Filtro = "TODOS" | "PENDENTE" | "EXPEDIDO";
+export type Status = "PENDENTE" | "AGUARDANDO" | "EXPEDIDO";
+export type Filtro = "TODOS"  | "AGUARDANDO" | "EXPEDIDO" | "NF DISPONIVEIS";
 
 export interface Expedicao {
   id: string;
@@ -7,7 +7,7 @@ export interface Expedicao {
   cliente: string;
   dataNota: string;
   volumes: number;
-  status: "PENDENTE" | "EXPEDIDO";
+  status: "NF DISPONIVEIS" | "AGUARDANDO" | "EXPEDIDO";
   dataExpedicao: string; // ✅ só quando expedir
   motorista?: string;
   cpf?: string;
