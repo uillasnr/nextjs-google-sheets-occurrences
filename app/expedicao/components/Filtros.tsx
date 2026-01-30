@@ -78,8 +78,8 @@ export default function Filtros({
           onClick={onAbrirRomaneio}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition
             ${romaneioAtivo
-              ? "bg-gray-100 dark:bg-gray-400 text-gray-700 dark:text-gray-300  shadow-lg shadow-gray-500/30"
-              : "bg-gray-100 dark:bg-gray-400 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800"
+              ? "bg-gray-50 dark:bg-gray-400 text-gray-700 dark:text-gray-300  shadow-lg shadow-gray-500/30"
+              : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-70"
             }`}
         >
           <Package className="w-4 h-4" />
