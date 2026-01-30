@@ -12,6 +12,8 @@ export interface Expedicao {
   motorista?: string;
   cpf?: string;
   placa?: string;
+  romaneio?: string;
+
 }
 
 export interface CadastrationExpedicao {
