@@ -17,8 +17,9 @@ export default function Filtros({
   romaneioAtivo: boolean;
 }) {
   const filtros = [
-    { valor: "PENDENTE", label: "Pendente", classe: "from-amber-600 to-amber-800" },
-    { valor: "EXPEDIDO", label: "Expedido", classe: "from-emerald-500 to-emerald-600" },
+      { valor: "NF DISPONIVEIS", label: "NF Disponiveis", classe: "from-amber-600 to-amber-800" },
+    { valor: "AGUARDANDO", label: "Aguardando", classe: "from-amber-600 to-amber-800" },    
+      { valor: "EXPEDIDO", label: "Expedido", classe: "from-emerald-500 to-emerald-600" },
     { valor: "TODOS", label: "Todas", classe: "from-blue-500 to-blue-600" },
   ] as const;
 
@@ -74,7 +75,7 @@ export default function Filtros({
         </div>
 
         {/* 📦 BOTÃO ROMANEIO */}
-        <button
+    {/*     <button
           onClick={onAbrirRomaneio}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition
             ${romaneioAtivo
@@ -84,7 +85,7 @@ export default function Filtros({
         >
           <Package className="w-4 h-4" />
           {romaneioAtivo ? "Romaneio" : "Criar Romaneio"}
-        </button>
+        </button> */}
       </div>
     </div>
   );
