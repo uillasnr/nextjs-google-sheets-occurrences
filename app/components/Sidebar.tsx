@@ -71,6 +71,7 @@ export default function Sidebar({
           {/* Tela inicial */}
           <button
             onClick={() => {
+              goToHome();
               router.push("/");
               setOpen(false);
             }}
