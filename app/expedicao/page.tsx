@@ -31,7 +31,10 @@ export default function ExpedicaoPage() {
     setCarregando(true);
     fetch("/api/expedicao")
       .then((r) => r.json())
-      .then((data: Expedicao[]) => setLista(data))
+      .then((data: Expedicao[]) => {
+        console.log("[v0] Expedition data loaded:", data.length, "items, statuses:", data.map(d => d.status));
+        setLista(data);
+      })
       .finally(() => setCarregando(false));
   }, []);
 
@@ -56,10 +59,12 @@ export default function ExpedicaoPage() {
   };
 
   const aguardarNF = async (item: Expedicao) => {
+    console.log("[v0] aguardarNF called for:", item.id, item.nota);
     const res = await fetch(`/api/expedicao/${item.id}`, {
       method: "PATCH",
     });
     const result = await res.json();
+    console.log("[v0] aguardarNF response:", result);
     setLista((prev) =>
       prev.map((i) =>
         i.id === item.id ? { ...i, status: "AGUARDANDO" as const } : i
