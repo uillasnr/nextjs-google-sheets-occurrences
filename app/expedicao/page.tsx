@@ -96,6 +96,9 @@ const MOCK_DATA: Expedicao[] = [
     volumes: 10,
     status: "AGUARDANDO",
     dataExpedicao: "",
+     motorista: "Antonio Pereira",
+    cpf: "456.789.123-00",
+    placa: "QWE-4R56",
   },
   {
     id: "m9",
@@ -105,6 +108,9 @@ const MOCK_DATA: Expedicao[] = [
     volumes: 6,
     status: "AGUARDANDO",
     dataExpedicao: "",
+     motorista: "Antonio Pereira",
+    cpf: "456.789.123-00",
+    placa: "QWE-4R56",
   },
   {    id: "m10",
     nota: 44995,
@@ -113,6 +119,9 @@ const MOCK_DATA: Expedicao[] = [
     volumes: 18,
     status: "AGUARDANDO",
     dataExpedicao: "",
+     motorista: "Antonio Pereira",
+    cpf: "456.789.123-00",
+    placa: "QWE-4R56",
   },
     {    id: "m101",
     nota: 44965,
@@ -121,6 +130,9 @@ const MOCK_DATA: Expedicao[] = [
     volumes: 21,
     status: "AGUARDANDO",
     dataExpedicao: "",
+     motorista: "Antonio Pereira",
+    cpf: "456.789.123-00",
+    placa: "QWE-4R56",
   },
 
  
@@ -185,9 +197,12 @@ export default function ExpedicaoPage() {
   const [filtro, setFiltro] = useState<Filtro>("NF DISPONIVEIS");
   const [busca, setBusca] = useState("");
   const [modalCadastro, setModalCadastro] = useState(false);
-  const [modalExpedir, setModalExpedir] = useState<Expedicao | null>(null);
+  const [romaneioInitialCliente, setRomaneioInitialCliente] = useState<string | null>(null);
+  const [romaneioInitialSelecionadas, setRomaneioInitialSelecionadas] = useState<string[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [abrirRomaneio, setAbrirRomaneio] = useState(false);
+  const [modalAguardar, setModalAguardar] = useState<Expedicao | null>(null);
+
 
   useEffect(() => {
     if (USE_MOCK) {
@@ -234,19 +249,25 @@ export default function ExpedicaoPage() {
     setLista((prev) => [criado, ...prev]);
   };
 
-  const aguardarNF = async (item: Expedicao) => {
-    if (!USE_MOCK) {
-      const res = await fetch(`/api/expedicao/${item.id}`, {
-        method: "PATCH",
-      });
-      await res.json();
-    }
-    setLista((prev) =>
-      prev.map((i) =>
-        i.id === item.id ? { ...i, status: "AGUARDANDO" as const } : i
-      )
-    );
-  };
+
+  const confirmarAguardar = async (atualizado: Expedicao) => {
+  if (!USE_MOCK) {
+    await fetch(`/api/expedicao/${atualizado.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(atualizado),
+    });
+  }
+
+  setLista((prev) =>
+    prev.map((i) =>
+      i.id === atualizado.id ? { ...i, ...atualizado, status: "AGUARDANDO" } : i
+    )
+  );
+
+  setModalAguardar(null);
+};
+
 
   const expedirNF = async (atualizado: Expedicao) => {
     if (!USE_MOCK) {
@@ -322,7 +343,11 @@ export default function ExpedicaoPage() {
         {abrirRomaneio ? (
           <Romaneio
             lista={lista}
-            onClose={() => setAbrirRomaneio(false)}
+            onClose={() => {
+              setAbrirRomaneio(false);
+              setRomaneioInitialCliente(null);
+              setRomaneioInitialSelecionadas([]);
+            }}
             onConfirm={(ids) => {
               setLista((prev) =>
                 prev.map((nf) =>
@@ -330,7 +355,11 @@ export default function ExpedicaoPage() {
                 )
               );
               setAbrirRomaneio(false);
+              setRomaneioInitialCliente(null);
+              setRomaneioInitialSelecionadas([]);
             }}
+            initialCliente={romaneioInitialCliente}
+            initialSelecionadas={romaneioInitialSelecionadas}
           />
         ) : filtrados.length === 0 ? (
           <div className="text-center py-20">
@@ -347,26 +376,31 @@ export default function ExpedicaoPage() {
         ) : (
           <ListaExpedicao
             lista={filtrados}
-            onExpedir={(item) => setModalExpedir(item)}
-            onAguardar={aguardarNF}
+            onExpedir={(item) => {
+              setRomaneioInitialCliente(item.cliente || null);
+              setRomaneioInitialSelecionadas([item.id]);
+              setAbrirRomaneio(true);
+            }}
+            onAguardar={(item) => setModalAguardar(item)}
           />
         )}
       </div>
 
-      {modalCadastro && (
-        <ModalCadastrarNF
-          onClose={() => setModalCadastro(false)}
-          onSave={cadastrarNF}
-        />
-      )}
+            {modalCadastro && (
+              <ModalCadastrarNF
+                onClose={() => setModalCadastro(false)}
+                onSave={cadastrarNF}
+              />
+            )}
 
-      {modalExpedir && (
-        <ModalAguardar
-          item={modalExpedir}
-          onClose={() => setModalExpedir(null)}
-          onConfirm={expedirNF}
-        />
-      )}
+            {modalAguardar && (
+              <ModalAguardar
+                item={modalAguardar}
+                onClose={() => setModalAguardar(null)}
+                onConfirm={confirmarAguardar}
+              />
+            )}
+
     </div>
   );
 }
