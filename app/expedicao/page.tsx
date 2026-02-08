@@ -7,7 +7,6 @@ import { FileText } from "lucide-react";
 import Filtros from "./components/Filtros";
 import ListaExpedicao from "./components/ListaExpedicao";
 import ModalCadastrarNF from "./components/ModalCadastrarNF";
-import ModalExpedir from "./components/ModalExpedir";
 import Sidebar from "@/app/components/Sidebar";
 import HeaderExpedicao from "./components/HeaderExpedicao";
 import StatusCard from "./components/StatusCard";
@@ -16,6 +15,7 @@ import Loading from "@/components/Loading";
 import Romaneio from "./components/Romaneio";
 
 import { CadastrationExpedicao, Expedicao, Filtro } from "@/types/Expedicao";
+import ModalAguardar from "./components/ModalAguardar";
 
 // ---- DADOS MOCK ----
 const MOCK_DATA: Expedicao[] = [
@@ -106,15 +106,25 @@ const MOCK_DATA: Expedicao[] = [
     status: "AGUARDANDO",
     dataExpedicao: "",
   },
-  {
-    id: "m10",
+  {    id: "m10",
     nota: 44995,
-    cliente: "Ferragens Oliveira",
-    dataNota: "2026-02-03",
+    cliente: "Loja das Tintas",
+    dataNota: "2026-02-01",
     volumes: 18,
     status: "AGUARDANDO",
     dataExpedicao: "",
   },
+    {    id: "m101",
+    nota: 44965,
+    cliente: "Loja das Tintas",
+    dataNota: "2026-02-01",
+    volumes: 21,
+    status: "AGUARDANDO",
+    dataExpedicao: "",
+  },
+
+ 
+  
 
   // EXPEDIDO - notas ja expedidas
   {
@@ -132,6 +142,18 @@ const MOCK_DATA: Expedicao[] = [
   {
     id: "m12",
     nota: 44910,
+    cliente: "Padaria Pao Quente",
+    dataNota: "2026-01-29",
+    volumes: 2,
+    status: "EXPEDIDO",
+    dataExpedicao: "2026-02-02",
+    motorista: "Jose Santos",
+    cpf: "987.654.321-00",
+    placa: "XYZ-9E87",
+  },
+    {
+    id: "m13",
+    nota: 44911,
     cliente: "Padaria Pao Quente",
     dataNota: "2026-01-29",
     volumes: 2,
@@ -160,7 +182,7 @@ const USE_MOCK = true; // Troque para false quando quiser usar a API real
 export default function ExpedicaoPage() {
   const router = useRouter();
   const [lista, setLista] = useState<Expedicao[]>([]);
-  const [filtro, setFiltro] = useState<Filtro>("TODOS");
+  const [filtro, setFiltro] = useState<Filtro>("NF DISPONIVEIS");
   const [busca, setBusca] = useState("");
   const [modalCadastro, setModalCadastro] = useState(false);
   const [modalExpedir, setModalExpedir] = useState<Expedicao | null>(null);
@@ -339,7 +361,7 @@ export default function ExpedicaoPage() {
       )}
 
       {modalExpedir && (
-        <ModalExpedir
+        <ModalAguardar
           item={modalExpedir}
           onClose={() => setModalExpedir(null)}
           onConfirm={expedirNF}
