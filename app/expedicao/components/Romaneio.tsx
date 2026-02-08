@@ -10,16 +10,24 @@ type Props = {
   lista: Expedicao[];
   onClose: () => void;
   onConfirm: (ids: string[]) => void;
+  initialCliente?: string | null;
+  initialSelecionadas?: string[];
 };
 
-export default function Romaneio({ lista, onClose, onConfirm }: Props) {
+export default function Romaneio({
+  lista,
+  onClose,
+  onConfirm,
+  initialCliente = null,
+  initialSelecionadas = [],
+}: Props) {
   const [placaVeiculo, setPlacaVeiculo] = useState("");
   const [nomeMotorista, setNomeMotorista] = useState("");
   const [cpfMotorista, setCpfMotorista] = useState("");
   const [clienteSelecionado, setClienteSelecionado] = useState<string | null>(
-    null,
+    initialCliente,
   );
-  const [selecionadas, setSelecionadas] = useState<string[]>([]);
+  const [selecionadas, setSelecionadas] = useState<string[]>(initialSelecionadas);
 
   // 🔥 AGRUPA POR CLIENTE (AGORA COM 1 OU MAIS NFs)
   const grupos = useMemo(() => {
