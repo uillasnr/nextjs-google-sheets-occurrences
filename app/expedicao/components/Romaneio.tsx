@@ -26,7 +26,7 @@ export default function Romaneio({ lista, onClose, onConfirm }: Props) {
     const mapa: Record<string, Expedicao[]> = {};
 
     lista.forEach((nf) => {
-      if (nf.status !== "PENDENTE") return;
+      if (nf.status !== "NF DISPONIVEIS" && nf.status !== "AGUARDANDO") return;
       if (!mapa[nf.cliente]) mapa[nf.cliente] = [];
       mapa[nf.cliente].push(nf);
     });

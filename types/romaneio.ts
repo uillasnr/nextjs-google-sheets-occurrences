@@ -4,7 +4,7 @@ export function agruparPorCliente(lista: Expedicao[]) {
   const grupos: Record<string, Expedicao[]> = {};
 
   lista.forEach((nf) => {
-    if (nf.status !== "PENDENTE") return;
+    if (nf.status !== "NF DISPONIVEIS" && nf.status !== "AGUARDANDO") return;
 
     if (!grupos[nf.cliente]) {
       grupos[nf.cliente] = [];
