@@ -1,5 +1,5 @@
-export type Status = "PENDENTE" | "AGUARDANDO" | "EXPEDIDO";
-export type Filtro = "TODOS"  | "AGUARDANDO" | "EXPEDIDO" | "NF DISPONIVEIS";
+export type Status = "NF DISPONIVEIS" | "AGUARDANDO" | "EXPEDIDO";
+export type Filtro = "TODOS" | "NF DISPONIVEIS" | "AGUARDANDO" | "EXPEDIDO";
 
 export interface Expedicao {
   id: string;
@@ -7,13 +7,12 @@ export interface Expedicao {
   cliente: string;
   dataNota: string;
   volumes: number;
-  status: "NF DISPONIVEIS" | "AGUARDANDO" | "EXPEDIDO";
-  dataExpedicao: string; // ✅ só quando expedir
+  status: Status;
+  dataExpedicao: string;
   motorista?: string;
   cpf?: string;
   placa?: string;
   romaneio?: string;
-
 }
 
 export interface CadastrationExpedicao {
@@ -22,5 +21,5 @@ export interface CadastrationExpedicao {
   cliente: string;
   dataNota: string;
   volumes: number;
-  status: "PENDENTE";
+  status: "NF DISPONIVEIS";
 }

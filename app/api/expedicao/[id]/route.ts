@@ -9,3 +9,11 @@ export async function PUT(
   const atualizado = await ExpedicaoService.expedir(params.id, body);
   return NextResponse.json(atualizado);
 }
+
+export async function PATCH(
+  _request: Request,
+  { params }: { params: { id: string } }
+) {
+  const atualizado = await ExpedicaoService.aguardar(params.id);
+  return NextResponse.json(atualizado);
+}

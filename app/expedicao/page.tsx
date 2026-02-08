@@ -20,7 +20,7 @@ import { CadastrationExpedicao, Expedicao, Filtro } from "@/types/Expedicao";
 export default function ExpedicaoPage() {
   const router = useRouter();
   const [lista, setLista] = useState<Expedicao[]>([]);
-  const [filtro, setFiltro] = useState<Filtro>("PENDENTE");
+  const [filtro, setFiltro] = useState<Filtro>("TODOS");
   const [busca, setBusca] = useState("");
   const [modalCadastro, setModalCadastro] = useState(false);
   const [modalExpedir, setModalExpedir] = useState<Expedicao | null>(null);
@@ -55,6 +55,18 @@ export default function ExpedicaoPage() {
     setLista((prev) => [criado, ...prev]);
   };
 
+  const aguardarNF = async (item: Expedicao) => {
+    const res = await fetch(`/api/expedicao/${item.id}`, {
+      method: "PATCH",
+    });
+    const result = await res.json();
+    setLista((prev) =>
+      prev.map((i) =>
+        i.id === item.id ? { ...i, status: "AGUARDANDO" as const } : i
+      )
+    );
+  };
+
   const expedirNF = async (atualizado: Expedicao) => {
     const res = await fetch(`/api/expedicao/${atualizado.id}`, {
       method: "PUT",
@@ -62,7 +74,11 @@ export default function ExpedicaoPage() {
       body: JSON.stringify(atualizado),
     });
     const salvo: Expedicao = await res.json();
-    setLista((prev) => prev.map((i) => (i.id === salvo.id ? salvo : i)));
+    setLista((prev) =>
+      prev.map((i) =>
+        i.id === salvo.id ? { ...i, ...salvo, status: "EXPEDIDO" as const } : i
+      )
+    );
   };
 
   if (carregando) {
@@ -81,9 +97,9 @@ export default function ExpedicaoPage() {
         sheet="SP"
       />
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-5">
             <StatusCard
               lista={lista}
               filtroAtual={filtro}
@@ -119,21 +135,29 @@ export default function ExpedicaoPage() {
             onConfirm={(ids) => {
               setLista((prev) =>
                 prev.map((nf) =>
-                  ids.includes(nf.id) ? { ...nf, status: "EXPEDIDO" } : nf,
-                ),
+                  ids.includes(nf.id) ? { ...nf, status: "EXPEDIDO" } : nf
+                )
               );
               setAbrirRomaneio(false);
             }}
           />
         ) : filtrados.length === 0 ? (
           <div className="text-center py-20">
-            <FileText className="mx-auto h-12 w-12 text-gray-400" />
-            <p className="mt-4 text-gray-500">Nenhuma nota encontrada</p>
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+              <FileText className="h-8 w-8 text-gray-400" />
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 font-medium">
+              Nenhuma nota encontrada
+            </p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+              Tente ajustar os filtros ou cadastre uma nova nota
+            </p>
           </div>
         ) : (
           <ListaExpedicao
             lista={filtrados}
             onExpedir={(item) => setModalExpedir(item)}
+            onAguardar={aguardarNF}
           />
         )}
       </div>

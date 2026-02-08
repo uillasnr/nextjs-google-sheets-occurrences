@@ -29,7 +29,7 @@ export default function ModalCadastrarNF({ onClose, onSave }: Props) {
       cliente: formData.cliente,
       dataNota: formatDateBR(formData.dataNota),
       volumes: Number(formData.volumes),
-      status: "PENDENTE",
+      status: "NF DISPONIVEIS",
     };
 
     onSave(novo);

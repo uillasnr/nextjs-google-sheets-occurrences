@@ -7,9 +7,8 @@ export interface RegistroExpedicao {
   dataNota: string;
   cliente: string;
   volumes: string | number;
-  status: "PENDENTE" | "EXPEDIDO";
+  status: "NF DISPONIVEIS" | "AGUARDANDO" | "EXPEDIDO";
 
-  // ⬇️ somente quando expedir
   motorista?: string;
   cpf?: string;
   placa?: string;
@@ -36,12 +35,12 @@ export class ExpedicaoService {
     "",               // G - CPF
     "",               // H - Placa
     "",               // I - Data Expedição
-    "PENDENTE",       // J - Status
+    "NF DISPONIVEIS", // J - Status
   ];
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
-      range: `'${this.SHEET_NAME}'!A:I`,
+      range: `'${this.SHEET_NAME}'!A:J`,
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
       requestBody: { values: [row] },
@@ -51,15 +50,46 @@ export class ExpedicaoService {
       id,
       nota: data.nota,
       cliente: data.cliente,
+      dataNota: data.dataNota,
       volumes: data.volumes,
-      status: "PENDENTE",
+      status: "NF DISPONIVEIS",
+      dataExpedicao: "",
     };
   }
 
   /**
-   * ✅ EXPEDIR NF
-   * ✅ Cria data
-   * ✅ Atualiza motorista / cpf / placa
+   * Mover NF para AGUARDANDO (sem dados de transporte ainda)
+   */
+  static async aguardar(id: string) {
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `'${this.SHEET_NAME}'!A2:A`,
+    });
+
+    const rows = res.data.values || [];
+    const index = rows.findIndex((row) => row[0] === id);
+
+    if (index === -1) {
+      throw new Error("Registro nao encontrado");
+    }
+
+    const rowNumber = index + 2;
+
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `'${this.SHEET_NAME}'!J${rowNumber}`,
+      valueInputOption: "RAW",
+      requestBody: {
+        values: [["AGUARDANDO"]],
+      },
+    });
+
+    return { id, status: "AGUARDANDO" };
+  }
+
+  /**
+   * EXPEDIR NF
+   * Atualiza motorista / cpf / placa / data
    */
   static async expedir(id: string, data: RegistroExpedicao) {
   const res = await sheets.spreadsheets.values.get({
@@ -113,18 +143,24 @@ export class ExpedicaoService {
 
   const rows = res.data.values || [];
 
-  return rows.map((row) => ({
-    id: row[0],
-    nota: row[1],
-    cliente: row[2],
-    dataNota: row[3],
-    volumes: row[4],
-    motorista: row[5] || "",
-    cpf: row[6] || "",
-    placa: row[7] || "",
-    dataExpedicao: row[8] || "",
-    status: row[9],
-  }));
+  return rows.map((row) => {
+    // Backward compat: map old PENDENTE to NF DISPONIVEIS
+    let status = row[9] || "NF DISPONIVEIS";
+    if (status === "PENDENTE") status = "NF DISPONIVEIS";
+
+    return {
+      id: row[0],
+      nota: row[1],
+      cliente: row[2],
+      dataNota: row[3],
+      volumes: row[4],
+      motorista: row[5] || "",
+      cpf: row[6] || "",
+      placa: row[7] || "",
+      dataExpedicao: row[8] || "",
+      status,
+    };
+  });
 }
 }
 
