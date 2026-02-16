@@ -14,6 +14,7 @@ import {
 import { useState } from "react";
 import { Expedicao } from "@/types/Expedicao";
 import { aguardarSchema, type AguardarData } from "../schemas/validations";
+import { formatDateBR } from "@/lib/formatDate";
 
 export default function ModalAguardar({
   item,
@@ -113,7 +114,7 @@ export default function ModalAguardar({
             <Package className="w-4 h-4 text-blue-500" /> {item.volumes} volumes
           </p>
           <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-            <Calendar className="w-4 h-4 text-blue-500" /> {item.dataNota}
+            <Calendar className="w-4 h-4 text-blue-500" />{formatDateBR(item.dataNota)}
           </p>
         </div>
 
