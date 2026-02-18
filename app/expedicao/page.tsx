@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileText } from "lucide-react";
+import { FileText, Truck, X, Package } from "lucide-react";
 
 import Filtros from "./components/Filtros";
 import ListaExpedicao from "./components/ListaExpedicao";
@@ -13,6 +13,7 @@ import StatusCard from "./components/StatusCard";
 import DashboardExpedicao from "./components/Dashboard";
 import Loading from "@/components/Loading";
 import Romaneio from "./components/Romaneio";
+import ModalExpedirSelecionadas from "./components/ModalExpedirSelecionadas";
 
 import { CadastrationExpedicao, Expedicao, Filtro } from "@/types/Expedicao";
 import ModalAguardar from "./components/ModalAguardar";
@@ -96,7 +97,7 @@ const MOCK_DATA: Expedicao[] = [
     volumes: 10,
     status: "AGUARDANDO",
     dataExpedicao: "",
-     motorista: "Antonio Pereira",
+    motorista: "Antonio Pereira",
     cpf: "456.789.123-00",
     placa: "QWE-4R56",
   },
@@ -108,35 +109,34 @@ const MOCK_DATA: Expedicao[] = [
     volumes: 6,
     status: "AGUARDANDO",
     dataExpedicao: "",
-     motorista: "Antonio Pereira",
+    motorista: "Antonio Pereira",
     cpf: "456.789.123-00",
     placa: "QWE-4R56",
   },
-  {    id: "m10",
+  {
+    id: "m10",
     nota: 44995,
     cliente: "Loja das Tintas",
     dataNota: "2026-02-01",
     volumes: 18,
     status: "AGUARDANDO",
     dataExpedicao: "",
-     motorista: "Antonio Pereira",
+    motorista: "Antonio Pereira",
     cpf: "456.789.123-00",
     placa: "QWE-4R56",
   },
-    {    id: "m101",
+  {
+    id: "m101",
     nota: 44965,
     cliente: "Loja das Tintas",
     dataNota: "2026-02-01",
     volumes: 21,
     status: "AGUARDANDO",
     dataExpedicao: "",
-     motorista: "Antonio Pereira",
+    motorista: "Antonio Pereira",
     cpf: "456.789.123-00",
     placa: "QWE-4R56",
   },
-
- 
-  
 
   // EXPEDIDO - notas ja expedidas
   {
@@ -163,8 +163,8 @@ const MOCK_DATA: Expedicao[] = [
     cpf: "987.654.321-00",
     placa: "XYZ-9E87",
   },
-    {
-    id: "m13",
+  {
+    id: "m14",
     nota: 44911,
     cliente: "Padaria Pao Quente",
     dataNota: "2026-01-29",
@@ -176,7 +176,7 @@ const MOCK_DATA: Expedicao[] = [
     placa: "XYZ-9E87",
   },
   {
-    id: "m13",
+    id: "m15",
     nota: 44920,
     cliente: "Casa & Construcao",
     dataNota: "2026-01-30",
@@ -189,7 +189,7 @@ const MOCK_DATA: Expedicao[] = [
   },
 ];
 
-const USE_MOCK = true; // Troque para false quando quiser usar a API real
+const USE_MOCK = true;
 
 export default function ExpedicaoPage() {
   const router = useRouter();
@@ -203,6 +203,9 @@ export default function ExpedicaoPage() {
   const [abrirRomaneio, setAbrirRomaneio] = useState(false);
   const [modalAguardar, setModalAguardar] = useState<Expedicao | null>(null);
 
+  // Estado de selecao para expedicao
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [modalExpedir, setModalExpedir] = useState(false);
 
   useEffect(() => {
     if (USE_MOCK) {
@@ -230,6 +233,14 @@ export default function ExpedicaoPage() {
     });
   }, [lista, filtro, busca]);
 
+  const notasSelecionadas = useMemo(() => {
+    return lista.filter((nf) => selectedIds.includes(nf.id));
+  }, [lista, selectedIds]);
+
+  const totalVolumesSelecionados = useMemo(() => {
+    return notasSelecionadas.reduce((acc, nf) => acc + Number(nf.volumes || 0), 0);
+  }, [notasSelecionadas]);
+
   const cadastrarNF = async (novo: CadastrationExpedicao) => {
     if (USE_MOCK) {
       const criado: Expedicao = {
@@ -249,25 +260,23 @@ export default function ExpedicaoPage() {
     setLista((prev) => [criado, ...prev]);
   };
 
-
   const confirmarAguardar = async (atualizado: Expedicao) => {
-  if (!USE_MOCK) {
-    await fetch(`/api/expedicao/${atualizado.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(atualizado),
-    });
-  }
+    if (!USE_MOCK) {
+      await fetch(`/api/expedicao/${atualizado.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(atualizado),
+      });
+    }
 
-  setLista((prev) =>
-    prev.map((i) =>
-      i.id === atualizado.id ? { ...i, ...atualizado, status: "AGUARDANDO" } : i
-    )
-  );
+    setLista((prev) =>
+      prev.map((i) =>
+        i.id === atualizado.id ? { ...i, ...atualizado, status: "AGUARDANDO" } : i
+      )
+    );
 
-  setModalAguardar(null);
-};
-
+    setModalAguardar(null);
+  };
 
   const expedirNF = async (atualizado: Expedicao) => {
     if (!USE_MOCK) {
@@ -291,6 +300,32 @@ export default function ExpedicaoPage() {
           : i
       )
     );
+  };
+
+  const handleToggleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = (ids: string[]) => {
+    setSelectedIds(ids);
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedIds([]);
+  };
+
+  const handleExpedirSelecionadas = (ids: string[]) => {
+    setLista((prev) =>
+      prev.map((nf) =>
+        ids.includes(nf.id)
+          ? { ...nf, status: "EXPEDIDO" as const, dataExpedicao: new Date().toISOString().split("T")[0] }
+          : nf
+      )
+    );
+    setSelectedIds([]);
+    setModalExpedir(false);
   };
 
   if (carregando) {
@@ -382,25 +417,78 @@ export default function ExpedicaoPage() {
               setAbrirRomaneio(true);
             }}
             onAguardar={(item) => setModalAguardar(item)}
+            selectedIds={selectedIds}
+            onToggleSelect={handleToggleSelect}
+            onSelectAll={handleSelectAll}
+            onDeselectAll={handleDeselectAll}
           />
         )}
       </div>
 
-            {modalCadastro && (
-              <ModalCadastrarNF
-                onClose={() => setModalCadastro(false)}
-                onSave={cadastrarNF}
-              />
-            )}
+      {/* Floating Action Bar - aparece quando ha notas selecionadas */}
+      {selectedIds.length > 0 && !abrirRomaneio && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-gray-900 dark:bg-gray-100 rounded-2xl shadow-2xl px-6 py-4 flex items-center gap-5 border border-gray-700 dark:border-gray-300">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
+                <Package className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white dark:text-gray-900">
+                  {selectedIds.length} nota{selectedIds.length > 1 ? "s" : ""} selecionada{selectedIds.length > 1 ? "s" : ""}
+                </p>
+                <p className="text-xs text-gray-400 dark:text-gray-600">
+                  {totalVolumesSelecionados} volumes no total
+                </p>
+              </div>
+            </div>
 
-            {modalAguardar && (
-              <ModalAguardar
-                item={modalAguardar}
-                onClose={() => setModalAguardar(null)}
-                onConfirm={confirmarAguardar}
-              />
-            )}
+            <div className="w-px h-8 bg-gray-700 dark:bg-gray-300" />
 
+            <button
+              onClick={() => setSelectedIds([])}
+              className="p-2 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 text-gray-400 dark:text-gray-500 hover:text-white dark:hover:text-gray-900 transition-colors"
+              title="Limpar selecao"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => setModalExpedir(true)}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/30 transition-all hover:scale-105 active:scale-95"
+            >
+              <Truck className="w-5 h-5" />
+              Expedir Selecionadas
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Cadastro */}
+      {modalCadastro && (
+        <ModalCadastrarNF
+          onClose={() => setModalCadastro(false)}
+          onSave={cadastrarNF}
+        />
+      )}
+
+      {/* Modal Aguardar */}
+      {modalAguardar && (
+        <ModalAguardar
+          item={modalAguardar}
+          onClose={() => setModalAguardar(null)}
+          onConfirm={confirmarAguardar}
+        />
+      )}
+
+      {/* Modal Expedir Selecionadas */}
+      {modalExpedir && notasSelecionadas.length > 0 && (
+        <ModalExpedirSelecionadas
+          notas={notasSelecionadas}
+          onClose={() => setModalExpedir(false)}
+          onConfirm={handleExpedirSelecionadas}
+        />
+      )}
     </div>
   );
 }
