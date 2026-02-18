@@ -12,7 +12,7 @@ import HeaderExpedicao from "./components/HeaderExpedicao";
 import StatusCard from "./components/StatusCard";
 import DashboardExpedicao from "./components/Dashboard";
 import Loading from "@/components/Loading";
-import Romaneio from "./components/Romaneio";
+
 import ModalExpedirSelecionadas from "./components/ModalExpedirSelecionadas";
 
 import { CadastrationExpedicao, Expedicao, Filtro } from "@/types/Expedicao";
@@ -375,40 +375,7 @@ export default function ExpedicaoPage() {
           </div>
         </div>
 
-        {abrirRomaneio ? (
-          <Romaneio
-            lista={lista}
-            onClose={() => {
-              setAbrirRomaneio(false);
-              setRomaneioInitialCliente(null);
-              setRomaneioInitialSelecionadas([]);
-            }}
-            onConfirm={(ids) => {
-              setLista((prev) =>
-                prev.map((nf) =>
-                  ids.includes(nf.id) ? { ...nf, status: "EXPEDIDO" } : nf
-                )
-              );
-              setAbrirRomaneio(false);
-              setRomaneioInitialCliente(null);
-              setRomaneioInitialSelecionadas([]);
-            }}
-            initialCliente={romaneioInitialCliente}
-            initialSelecionadas={romaneioInitialSelecionadas}
-          />
-        ) : filtrados.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-              <FileText className="h-8 w-8 text-gray-400" />
-            </div>
-            <p className="text-gray-600 dark:text-gray-400 font-medium">
-              Nenhuma nota encontrada
-            </p>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
-              Tente ajustar os filtros ou cadastre uma nova nota
-            </p>
-          </div>
-        ) : (
+      
           <ListaExpedicao
             lista={filtrados}
             onExpedir={(item) => {
@@ -422,7 +389,7 @@ export default function ExpedicaoPage() {
             onSelectAll={handleSelectAll}
             onDeselectAll={handleDeselectAll}
           />
-        )}
+        
       </div>
 
       {/* Floating Action Bar - aparece quando ha notas selecionadas */}

@@ -34,6 +34,8 @@ export default function ModalExpedirSelecionadas({
   onConfirm,
 }: Props) {
   const [step, setStep] = useState<Step>("revisar");
+// ADICIONE no topo junto com os outros useState
+const [responsavelExpedicao, setResponsavelExpedicao] = useState("");
 
   const totalVolumes = useMemo(
     () => notas.reduce((acc, nf) => acc + Number(nf.volumes || 0), 0),
@@ -85,7 +87,7 @@ export default function ModalExpedirSelecionadas({
             <div>
               <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
                 {step === "revisar" && "Revisar Notas Selecionadas"}
-                {step === "confirmar" && "Confirmar Expedicao"}
+                {step === "confirmar" && "Confirmar Expedição"}
                 {step === "concluido" && "Expedicao Concluida"}
               </h2>
               <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -139,6 +141,8 @@ export default function ModalExpedirSelecionadas({
                       {s.label}
                     </span>
                   </div>
+             
+
                 </div>
               );
             })}
@@ -165,6 +169,21 @@ export default function ModalExpedirSelecionadas({
                   <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">Cliente{gruposPorCliente.length > 1 ? "s" : ""}</p>
                 </div>
               </div>
+
+{/* Responsável pela Expedição */}
+<div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+  <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+    Responsável pela Expedição
+  </h4>
+
+  <input
+    type="text"
+    value={responsavelExpedicao}
+    onChange={(e) => setResponsavelExpedicao(e.target.value)}
+    placeholder="Digite o nome do responsável"
+    className="w-full px-3 py-2 rounded-lg  bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-sm hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-gray-100"
+  />
+</div>
 
               {/* Lista de Notas */}
               <div className="space-y-3">
@@ -239,10 +258,10 @@ export default function ModalExpedirSelecionadas({
                   </div>
                   <div>
                     <h4 className="font-bold text-amber-800 dark:text-amber-300">
-                      Confirmar expedicao de {notas.length} nota{notas.length > 1 ? "s" : ""}?
+                      Confirmar expedição de {notas.length} nota{notas.length > 1 ? "s" : ""}?
                     </h4>
                     <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
-                      Esta acao ira alterar o status das notas selecionadas para <strong>EXPEDIDO</strong>.
+                      Esta ação ira alterar o status das notas selecionadas para <strong>EXPEDIDO</strong>.
                       Um romaneio sera gerado automaticamente para download.
                     </p>
                   </div>
@@ -252,7 +271,7 @@ export default function ModalExpedirSelecionadas({
               {/* Resumo Final */}
               <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                 <h4 className="text-sm font-bold text-gray-600 dark:text-gray-400 mb-3 uppercase tracking-wide">
-                  Resumo da Expedicao
+                  Resumo da Expedição
                 </h4>
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between text-sm">
@@ -260,7 +279,7 @@ export default function ModalExpedirSelecionadas({
                       <FileText className="w-4 h-4" /> Notas Fiscais
                     </span>
                     <span className="font-bold text-gray-800 dark:text-gray-200">
-                      {notas.map((nf) => nf.nota).join(", ")}
+                      NF {notas.map((nf) => nf.nota).join(", ")}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
@@ -281,6 +300,15 @@ export default function ModalExpedirSelecionadas({
                     </span>
                     <span className="font-bold text-gray-800 dark:text-gray-200">{placa || "N/A"}</span>
                   </div>
+                  <div className="flex items-center justify-between text-sm">
+  <span className="text-gray-500 dark:text-gray-400 flex items-center gap-2">
+     <User className="w-4 h-4" /> Responsável Expedição
+  </span>
+  <span className="font-bold text-gray-800 dark:text-gray-200">
+    {responsavelExpedicao || "N/A"}
+  </span>
+</div>
+
                 </div>
               </div>
             </div>
@@ -315,6 +343,10 @@ export default function ModalExpedirSelecionadas({
                   <span className="text-gray-600 dark:text-gray-400">Motorista</span>
                   <span className="font-bold text-gray-800 dark:text-gray-200">{motorista || "N/A"}</span>
                 </div>
+                 <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Responsável Expedição</span>
+                  <span className="font-bold text-gray-800 dark:text-gray-200"> {responsavelExpedicao || "N/A"}</span>
+                </div>
               </div>
 
               {/* Download PDF */}
@@ -326,6 +358,7 @@ export default function ModalExpedirSelecionadas({
                     placaVeiculo={placa}
                     nomeMotorista={motorista}
                     cpfMotorista={cpf}
+                      responsavelExpedicao={responsavelExpedicao}
                   />
                 }
                 fileName={`romaneio-${cliente}-${new Date().toISOString().split("T")[0]}.pdf`}
@@ -352,7 +385,7 @@ export default function ModalExpedirSelecionadas({
             <>
               <button
                 onClick={onClose}
-                className="px-5 py-2.5 rounded-xl font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="px-5 py-2.5 rounded-xl font-bold bg-gray-200 dark:bg-gray-700  text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 Cancelar
               </button>
@@ -370,7 +403,7 @@ export default function ModalExpedirSelecionadas({
             <>
               <button
                 onClick={() => setStep("revisar")}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="flex items-center gap-2 px-5 py-2.5 bg-gray-200 dark:bg-gray-700 rounded-xl font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Voltar
