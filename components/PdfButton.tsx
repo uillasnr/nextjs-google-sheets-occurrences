@@ -9,7 +9,7 @@ import OccurrencePDFDocument from "@/app/components/OccurrencePDFDocument";
 
 interface PDFReportButtonProps {
   occurrences: Occurrence[];
-  sheet: "SP" | "PE" | "ES";
+  sheet: "SP" | "PE" | "ES" | "Fábrica" | "Tocantins_SP";
 }
 
 export default function PDFReportButton({

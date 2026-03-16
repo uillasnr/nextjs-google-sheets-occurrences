@@ -14,7 +14,7 @@ import { OccurrenceTypeByTransportadoraChart } from "./occurrence-type-by-transp
 import Footer from "@/components/Footer";
 
 interface DashboardProps {
-  selectedBranch: "SP" | "PE" | "ES";
+  selectedBranch: "SP" | "PE" | "ES" | "Fábrica" | "Tocantins_SP";
   occurrences: Occurrence[];
 }
 

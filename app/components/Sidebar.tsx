@@ -13,7 +13,7 @@ interface SidebarProps {
   goToDashboard: () => void;
   onSearchNF: (nf: string) => boolean;
   occurrences: Occurrence[]; // 👈 NOVO
-  sheet: "SP" | "PE" | "ES"; // 👈 NOVO
+  sheet: "SP" | "PE" | "ES" | "Fábrica" | "Tocantins_SP"; // 👈 NOVO
 }
 
 export default function Sidebar({

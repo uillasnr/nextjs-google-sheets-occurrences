@@ -20,7 +20,7 @@ export default function Home() {
   const [editingOccurrence, setEditingOccurrence] = useState<Occurrence | null>(
     null
   );
-  const [sheet, setSheet] = useState<"SP" | "PE" | "ES">("SP");
+  const [sheet, setSheet] = useState<"SP" | "PE" | "ES" | "Fábrica" | "Tocantins_SP">("SP");
   const [statusFilter, setStatusFilter] = useState<
     "Todos" | "Pendente" | "Em Andamento" | "Resolvido"
   >("Pendente");
