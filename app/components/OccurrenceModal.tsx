@@ -25,7 +25,7 @@ interface OccurrenceModalProps {
   onClose: () => void;
   onSubmit: (occurrence: Occurrence) => void;
   editingOccurrence?: Occurrence | null;
-  sheet: "SP" | "PE" | "ES";
+  sheet: "SP" | "PE" | "ES" | "Fábrica" | "Tocantins_SP";
 }
 
 const emptyForm: Occurrence = {

@@ -5,8 +5,8 @@ import { Occurrence } from "@/types/occurrence";
 import { Truck, Building2, Plus } from "lucide-react";
 
 interface HeaderProps {
-  sheet: "SP" | "PE" | "ES";
-  setSheet: (sheet: "SP" | "PE" | "ES") => void;
+  sheet: "SP" | "PE" | "ES" | "Fábrica" | "Tocantins_SP";
+  setSheet: (sheet: "SP" | "PE" | "ES" | "Fábrica" | "Tocantins_SP") => void;
   onNew: () => void;
   onSearchNF: (nf: string) => boolean;
   onClearSearch: () => void;
@@ -54,24 +54,35 @@ export default function Header({
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 justify-end w-full sm:w-auto">
             {/* Sidebar com as funções de navegação */}
-           <Sidebar
-        goToHome={goToHome}
-        goToDashboard={goToDashboard}
-        onSearchNF={onSearchNF}
-        occurrences={occurrences} // 👈 PASSANDO AS OCORRÊNCIAS
-        sheet={sheet} // 👈 PASSANDO A FILIAL
-      />
+            <Sidebar
+              goToHome={goToHome}
+              goToDashboard={goToDashboard}
+              onSearchNF={onSearchNF}
+              occurrences={occurrences} // 👈 PASSANDO AS OCORRÊNCIAS
+              sheet={sheet} // 👈 PASSANDO A FILIAL
+            />
 
             <div className="flex items-center gap-1 sm:gap-3 min-w-[120px]">
               <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground dark:text-gray-100 flex-shrink-0" />
               <select
                 value={sheet}
-                onChange={(e) => setSheet(e.target.value as "SP" | "PE" | "ES")}
+                onChange={(e) =>
+                  setSheet(
+                    e.target.value as
+                      | "SP"
+                      | "PE"
+                      | "ES"
+                      | "Fábrica"
+                      | "Tocantins_SP"
+                  )
+                }
                 className="flex-1 px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="SP">São Paulo - SP</option>
+                <option value="Tocantins_SP">Tocantins - SP</option>
                 <option value="ES">Espírito Santo - ES</option>
                 <option value="PE">Pernambuco - PE</option>
+                <option value="Fábrica">Fábrica</option>
               </select>
             </div>
 

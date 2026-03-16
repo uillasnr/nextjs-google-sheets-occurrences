@@ -1,6 +1,6 @@
 interface FooterProps {
   text?: string;
-  branch?: "SP" | "PE" | "ES";
+  branch?: "SP" | "PE" | "ES" | "Fábrica" | "Tocantins_SP";
 }
 
 export default function Footer({ text,  branch, }: FooterProps) {

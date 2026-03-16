@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
 /* ================= COMPONENT ================= */
 interface Props {
   occurrences: Occurrence[];
-  sheet: "SP" | "PE" | "ES";
+  sheet: "SP" | "PE" | "ES" | "Fábrica" | "Tocantins_SP";
 }
 
 const OccurrencePDFDocument: React.FC<Props> = ({ occurrences, sheet }) => {
