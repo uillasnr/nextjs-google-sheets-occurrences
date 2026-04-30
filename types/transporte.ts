@@ -1,0 +1,24 @@
+export type Transporte = {
+  notaFiscal: string;
+  numConhecimento: string;
+  numPedido: string;
+  remetente: string;
+  destinatario: string;
+  dataEmissao: string;
+  previsaoEntrega: string;
+  status: string;
+  ultimaOcorrencia: string;
+  dataOcorrencia: string;
+  modal: string;
+  filialOrigem: string;
+  cidadeOrigem: string;
+  ufOrigem: string;
+  filialDestino: string;
+  cidadeDestino: string;
+  ufDestino: string;
+  valorFrete: string;
+  peso: string;
+  volume: string;
+  valorMercadoria: string;
+  mes: string;
+};
