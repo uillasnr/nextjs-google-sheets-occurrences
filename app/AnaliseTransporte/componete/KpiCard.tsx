@@ -6,7 +6,7 @@ export default function KpiCard({ title, value, highlight }: any) {
       className={`p-6 rounded-card border shadow-card text-center
       ${
         highlight
-          ? "bg-brand-primary text-black shadow-glow"
+          ? "dark:bg-gray-900 text-black shadow-glow"
           : "bg-white dark:bg-card-dark border-gray-200 dark:border-card-border"
       }`}
     >

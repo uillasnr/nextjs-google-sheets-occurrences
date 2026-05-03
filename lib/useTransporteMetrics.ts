@@ -35,6 +35,14 @@ export function useTransporteMetrics(data?: Transporte[]) {
       topEstados: [],
       topCidades: [],
       topRotas: [],
+      totalEntregas: 0,
+      finalizadas: 0,
+      emAndamento: 0,
+      emAberto: 0,
+      eficiencia: "0",
+      freteMedio: 0,
+      percentualFreteMercadoria: "0",
+      totalValorMercadoria: 0,
     };
   }
 
@@ -45,6 +53,7 @@ export function useTransporteMetrics(data?: Transporte[]) {
   let totalAtraso = 0;
   let totalEntregasAtrasadas = 0;
   let maiorAtraso = 0;
+  let totalValorMercadoria = 0;
 
   const atrasoEstado: Record<string, number> = {};
   const atrasoCidade: Record<string, number> = {};
@@ -63,6 +72,15 @@ export function useTransporteMetrics(data?: Transporte[]) {
     );
 
     if (!isNaN(frete)) totalFrete += frete;
+
+    // 💰 VALOR MERCADORIA
+    const mercadoria = parseFloat(
+      String(item.valorMercadoria || "0")
+        .replace(/\./g, "")
+        .replace(",", ".")
+    );
+
+    if (!isNaN(mercadoria)) totalValorMercadoria += mercadoria;
 
     if (entrega && previsao) {
       const diff = diffDays(entrega, previsao);
@@ -100,15 +118,24 @@ export function useTransporteMetrics(data?: Transporte[]) {
     }
   });
 
+  const totalEntregas = data.length;
+  const finalizadas = data.filter((d) => d.status === "FINALIZADO").length;
+  const emAndamento = data.filter((d) => d.status !== "FINALIZADO" && d.dataOcorrencia).length;
+  const emAberto = totalEntregas - finalizadas - emAndamento;
+  const eficiencia = totalEntregas ? ((dentroPrazo / totalEntregas) * 100).toFixed(1) : "0";
+  const freteMedio = totalEntregas ? totalFrete / totalEntregas : 0;
+  const percentualFreteMercadoria = totalValorMercadoria ? ((totalFrete / totalValorMercadoria) * 100).toFixed(2) : "0";
+
   return {
     // 💰 FINANCEIRO
     totalFrete,
+    totalValorMercadoria,
 
     // ⏱️ TEMPO
     tempoMedio: countEntrega ? (totalDias / countEntrega).toFixed(1) : "0",
 
     // 📊 SLA
-    sla: data.length ? ((dentroPrazo / data.length) * 100).toFixed(1) : "0",
+    sla: eficiencia,
 
     // 🚨 ATRASO
     atrasoMedio: totalEntregasAtrasadas
@@ -121,5 +148,14 @@ export function useTransporteMetrics(data?: Transporte[]) {
     topEstados: getTop(atrasoEstado),
     topCidades: getTop(atrasoCidade),
     topRotas: getTop(atrasoRota),
+
+    // Novos KPIs
+    totalEntregas,
+    finalizadas,
+    emAndamento,
+    emAberto,
+    eficiencia,
+    freteMedio,
+    percentualFreteMercadoria,
   };
 }
