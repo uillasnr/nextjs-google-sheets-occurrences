@@ -1,22 +1,55 @@
-# Sistema de Gerenciamento de Ocorrências com Google Sheets
+# Sistema Completo de Gerenciamento de Ocorrências de Transporte
 
-Sistema completo em Next.js para gerenciar ocorrências de transporte com integração ao Google Sheets. Todas as operações CRUD (Criar, Ler, Atualizar, Deletar) são sincronizadas em tempo real com sua planilha.
+## 📌 Visão Geral
 
-## 🚀 Funcionalidades
+Sistema enterprise em **Next.js 14** para gerenciar **ocorrências de transporte**, **expedições**, **armazém** e **análise logística**. Integração completa com **Google Sheets** para sincronização em tempo real CRUD (Criar, Ler, Atualizar, Deletar).
 
-- ✅ **Listagem dinâmica** de ocorrências do Google Sheets
-- ✅ **Criar** novas ocorrências diretamente no Google Sheets
-- ✅ **Editar** ocorrências existentes
-- ✅ **Deletar** ocorrências
-- ✅ **Estatísticas em tempo real** (Total, Pendentes, Em Andamento, Resolvidos)
-- ✅ **Interface moderna** com Tailwind CSS
-- ✅ **Sincronização automática** com Google Sheets
+## 🎯 Módulos Principais
+
+### 1️⃣ **Ocorrências de Transporte** (Home)
+- ✅ Listagem dinâmica com filtros por status
+- ✅ Criar, editar e deletar ocorrências
+- ✅ Busca avançada por Nota Fiscal
+- ✅ Dashboard com estatísticas em tempo real
+- ✅ Exportação para PDF
+- ✅ Tema escuro/claro
+
+### 2️⃣ **Análise Logística** (AnaliseTransporte)
+- 📊 Dashboard avançado com KPIs
+- 📈 Gráficos de performance (Recharts)
+- 🗺️ Análise por Estado/UF
+- 🏢 Métricas por Transportadora
+- 📉 Taxa de Eficiência
+- 🔄 Filtros avançados (Mês, Estado, Filial, Status)
+
+### 3️⃣ **Gerenciamento de Expedições**
+- 📋 Controle de Notas Fiscais
+- 🚚 Status de Expedições (NF DISPONÍVEL → AGUARDANDO → EXPEDIDO)
+- 📄 Agrupamento por Cliente
+- 🗂️ Gestão de Romaneios
+- 📊 Dashboard de expedições mensal
+- ⚡ Operações em lote
+
+### 4️⃣ **Gerenciamento de Armazém**
+- 📦 Cadastro de produtos
+- 🏭 Rastreamento por SKU
+- 📭 Entrada/Saída em 48h
+- 🔖 Controle de estoque
+- 🚛 Tracking de transportadora
+
+## 🚀 Funcionalidades Gerais
+
+- ✅ **Sincronização em Tempo Real** com Google Sheets
+- ✅ **Interface Responsiva** (Mobile, Tablet, Desktop)
+- ✅ **Tema Escuro/Claro** com persistência
+- ✅ **Gráficos Interativos** (Recharts)
+- ✅ **Exportação PDF** de ocorrências e romaneios
+- ✅ **Busca Avançada** com filtros múltiplos
+- ✅ **Loading States** com animações customizadas
+- ✅ **TypeScript** para segurança de tipos
+- ✅ **Performance Otimizada** com memoização
 
 ## 📋 Pré-requisitos
-
-- Node.js 18+ instalado
-- Conta no Google Cloud Platform
-- Uma planilha do Google Sheets
 
 ## 🔧 Configuração do Google Sheets
 
