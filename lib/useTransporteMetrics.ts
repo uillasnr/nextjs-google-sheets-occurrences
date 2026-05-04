@@ -120,11 +120,17 @@ export function useTransporteMetrics(data?: Transporte[]) {
 
   const totalEntregas = data.length;
   const finalizadas = data.filter((d) => d.status === "FINALIZADO").length;
-  const emAndamento = data.filter((d) => d.status !== "FINALIZADO" && d.dataOcorrencia).length;
+  const emAndamento = data.filter(
+    (d) => d.status !== "FINALIZADO" && d.dataOcorrencia
+  ).length;
   const emAberto = totalEntregas - finalizadas - emAndamento;
-  const eficiencia = totalEntregas ? ((dentroPrazo / totalEntregas) * 100).toFixed(1) : "0";
+  const eficiencia = totalEntregas
+    ? ((dentroPrazo / totalEntregas) * 100).toFixed(1)
+    : "0";
   const freteMedio = totalEntregas ? totalFrete / totalEntregas : 0;
-  const percentualFreteMercadoria = totalValorMercadoria ? ((totalFrete / totalValorMercadoria) * 100).toFixed(2) : "0";
+  const percentualFreteMercadoria = totalValorMercadoria
+    ? ((totalFrete / totalValorMercadoria) * 100).toFixed(2)
+    : "0";
 
   return {
     // 💰 FINANCEIRO
