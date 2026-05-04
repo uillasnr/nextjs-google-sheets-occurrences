@@ -28,6 +28,7 @@ import {
   Clock,
 } from "lucide-react";
 import AnaliseHeader from "./componete/AnaliseHeader";
+import { TabelaDetalhada } from "./componete/TabelaDetalhada";
 
 const meses = [
   "janeiro",
@@ -351,96 +352,7 @@ export default function AnaliseTransporte() {
 
         {/* TABELA DETALHADA */}
         <Card title="Dados Detalhados">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-200 dark:border-card-border">
-                  <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
-                    NF
-                  </th>
-                  <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
-                    Cliente
-                  </th>
-                  <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
-                    UF Destino
-                  </th>
-                  <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
-                    Cidade
-                  </th>
-                  <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
-                    Status
-                  </th>
-                  <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
-                    Frete
-                  </th>
-                  <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
-                    Mercadoria
-                  </th>
-                  <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
-                    Emissão
-                  </th>
-                  <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
-                    Previsão
-                  </th>
-                  <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
-                    Ocorrência
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtrado.slice(0, 50).map((item, i) => (
-                  <tr
-                    key={i}
-                    className="border-b border-gray-100 dark:border-card-border hover:bg-gray-50 dark:hover:bg-card-darker transition-colors"
-                  >
-                    <td className="p-2 text-gray-800 dark:text-text-primary">
-                      {item.notaFiscal}
-                    </td>
-                    <td className="p-2 text-gray-800 dark:text-text-primary">
-                      {item.destinatario}
-                    </td>
-                    <td className="p-2 text-gray-800 dark:text-text-primary">
-                      {item.ufDestino}
-                    </td>
-                    <td className="p-2 text-gray-800 dark:text-text-primary">
-                      {item.cidadeDestino}
-                    </td>
-                    <td className="p-2">
-                      <span
-                        className={`px-2 py-1 rounded text-xs font-medium ${
-                          item.status === "FINALIZADO"
-                            ? "bg-status-success/20 text-status-success border border-status-success/30"
-                            : "bg-status-pending/20 text-status-pending border border-status-pending/30"
-                        }`}
-                      >
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="p-2 text-gray-800 dark:text-text-primary">
-                      R$ {item.valorFrete}
-                    </td>
-                    <td className="p-2 text-gray-800 dark:text-text-primary">
-                      R$ {item.valorMercadoria}
-                    </td>
-                    <td className="p-2 text-gray-800 dark:text-text-primary">
-                      {item.dataEmissao}
-                    </td>
-                    <td className="p-2 text-gray-800 dark:text-text-primary">
-                      {item.previsaoEntrega}
-                    </td>
-                    <td className="p-2 text-gray-800 dark:text-text-primary">
-                      {item.dataOcorrencia}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filtrado.length > 50 && (
-              <p className="text-sm text-gray-500 dark:text-text-secondary mt-2">
-                Mostrando 50 de {filtrado.length} registros
-              </p>
-            )}
-          </div>
+          <TabelaDetalhada dados={filtrado} />
         </Card>
       </div>
     </div>
