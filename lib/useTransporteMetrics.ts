@@ -124,8 +124,8 @@ export function useTransporteMetrics(data?: Transporte[]) {
     (d) => d.status !== "FINALIZADO" && d.dataOcorrencia
   ).length;
   const emAberto = totalEntregas - finalizadas - emAndamento;
-  const eficiencia = totalEntregas
-    ? ((dentroPrazo / totalEntregas) * 100).toFixed(1)
+  const eficiencia = countEntrega
+    ? ((dentroPrazo / countEntrega) * 100).toFixed(1)
     : "0";
   const freteMedio = totalEntregas ? totalFrete / totalEntregas : 0;
   const percentualFreteMercadoria = totalValorMercadoria

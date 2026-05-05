@@ -21,7 +21,7 @@ function parseDateBR(dateStr?: string) {
 export function TabelaDetalhada({ dados }: Props) {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const itensPorPagina = 50;
-  console.log("daddossss", dados);
+
   const totalPaginas = Math.ceil(dados.length / itensPorPagina);
 
   const dadosPaginados = useMemo(() => {
@@ -126,7 +126,7 @@ export function TabelaDetalhada({ dados }: Props) {
                   {atrasado ? `${diasAtraso} dias` : "-"}
                 </td>
 
-                <td className="p-2 text-gray-800 dark:text-text-primary">
+                <td className="p-2  text-gray-800 dark:text-text-primary">
                   R$ {item.valorFrete}
                 </td>
 
