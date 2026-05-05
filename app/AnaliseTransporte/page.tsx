@@ -30,20 +30,15 @@ import {
 import AnaliseHeader from "./componete/AnaliseHeader";
 import { TabelaDetalhada } from "./componete/TabelaDetalhada";
 
-const meses = [
-  "janeiro",
-  "fevereiro",
-  "março",
-  "abril",
-  "maio",
-  "junho",
-  "julho",
-  "agosto",
-  "setembro",
-  "outubro",
-  "novembro",
-  "dezembro",
-];
+function parseDateBR(dateStr?: string) {
+  if (!dateStr) return null;
+
+  const parts = dateStr.split("/");
+  if (parts.length !== 3) return new Date(dateStr);
+
+  const [day, month, year] = parts;
+  return new Date(`${year}-${month}-${day}`);
+}
 
 export default function AnaliseTransporte() {
   const [data, setData] = useState<Transporte[]>([]);
@@ -53,6 +48,7 @@ export default function AnaliseTransporte() {
   const [filialFiltro, setFilialFiltro] = useState("");
   const [statusFiltro, setStatusFiltro] = useState("");
   const [dark, setDark] = useState(false);
+  const [kpiFiltro, setKpiFiltro] = useState("");
 
   // ✅ FETCH SEGURO (NUNCA QUEBRA)
   useEffect(() => {
@@ -93,6 +89,26 @@ export default function AnaliseTransporte() {
 
   if (statusFiltro) {
     filtrado = filtrado.filter((d) => d.status === statusFiltro);
+  }
+
+  // 🔥 FILTRO POR KPI
+  if (kpiFiltro === "FINALIZADO") {
+    filtrado = filtrado.filter((d) => d.status === "FINALIZADO");
+  }
+
+  if (kpiFiltro === "ANDAMENTO") {
+    filtrado = filtrado.filter(
+      (d) => d.status !== "FINALIZADO" && d.dataOcorrencia
+    );
+  }
+
+  if (kpiFiltro === "ABERTO") {
+    filtrado = filtrado.filter(
+      (d) => !d.dataOcorrencia && d.status !== "FINALIZADO"
+    );
+  }
+  if (kpiFiltro === "ATRASADAS") {
+    filtrado = filtrado.filter((d) => calcularAtraso(d) > 0);
   }
 
   // 🔥 MÉTRICAS AVANÇADAS
@@ -137,6 +153,20 @@ export default function AnaliseTransporte() {
     new Set(data.map((d) => d.status).filter(Boolean))
   ).sort();
 
+  function calcularAtraso(item: Transporte) {
+    const dataPrev = parseDateBR(item.previsaoEntrega);
+    const dataReal = parseDateBR(item.dataOcorrencia);
+
+    if (!dataPrev || !dataReal) return 0;
+
+    const diff =
+      (dataReal.getTime() - dataPrev.getTime()) / (1000 * 60 * 60 * 24);
+
+    return diff > 0 ? Math.ceil(diff) : 0;
+  }
+
+  const notasAtrasadas = filtrado.filter((d) => calcularAtraso(d) > 0).length;
+
   return (
     <div className="min-h-screen  bg-gray-200/40 dark:bg-gray-950/95 transition-colors ">
       <Loading isOpen={loading} text="Carregando Dados de Transporte" />
@@ -178,16 +208,28 @@ export default function AnaliseTransporte() {
             icon={
               <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             }
+            active={kpiFiltro === "FINALIZADO"}
+            onClick={() =>
+              setKpiFiltro(kpiFiltro === "FINALIZADO" ? "" : "FINALIZADO")
+            }
           />
           <Kpi
             title="Em Andamento"
             value={metrics.emAndamento}
             icon={<Clock className="w-5 h-5 text-amber-500" />}
+            active={kpiFiltro === "ANDAMENTO"}
+            onClick={() =>
+              setKpiFiltro(kpiFiltro === "ANDAMENTO" ? "" : "ANDAMENTO")
+            }
           />
           <Kpi
-            title="Em Aberto"
-            value={metrics.emAberto}
-            icon={<Package className="w-5 h-5 text-status-pending" />}
+            title="Notas Atrasadas"
+            value={notasAtrasadas}
+            icon={<Clock className="w-5 h-5 text-red-500" />}
+            active={kpiFiltro === "ATRASADAS"}
+            onClick={() =>
+              setKpiFiltro(kpiFiltro === "ATRASADAS" ? "" : "ATRASADAS")
+            }
           />
         </div>
 
@@ -359,7 +401,7 @@ export default function AnaliseTransporte() {
   );
 }
 
-function Kpi({ title, value, highlight, type, icon }: any) {
+function Kpi({ title, value, highlight, type, icon, onClick, active }: any) {
   const colorMap: any = {
     success: "text-status-success",
     error: "text-status-error",
@@ -369,11 +411,14 @@ function Kpi({ title, value, highlight, type, icon }: any) {
 
   return (
     <div
-      className={`p-4 rounded-card border shadow-card text-center transition-colors ${
-        highlight
-          ? "dark:bg-gray-800/50 text-black shadow-glow"
-          : "bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 hover:shadow-card-hover"
-      }`}
+      onClick={onClick}
+      className={`p-4 rounded-card border shadow-card text-center transition-colors 
+        ${active ? "ring-2 ring-blue-500 scale-105" : ""}
+        ${
+          highlight
+            ? "dark:bg-gray-800/50 text-black shadow-glow"
+            : "bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 hover:shadow-card-hover"
+        }`}
     >
       <div className="flex items-center justify-center gap-2 mb-2 text-gray-500 dark:text-text-secondary">
         {icon}
