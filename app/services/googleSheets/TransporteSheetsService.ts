@@ -10,12 +10,13 @@ export class TransporteSheetsService {
       range: `'Braspress'!A:AD`, // ✅ pega tudo corretamente
     });
 
-    const rows = res.data.values || [];
+    const rows = (res.data.values || []).slice(1);
 
     return rows.map((row) => ({
       notaFiscal: row[0] || "",
       numConhecimento: row[1] || "",
       numPedido: row[2] || "",
+      cnpjRemetente: row[3] || "",
       remetente: row[4] || "",
       destinatario: row[6] || "",
       dataEmissao: row[7] || "",

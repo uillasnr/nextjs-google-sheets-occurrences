@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import AnaliseHeader from "./componete/AnaliseHeader";
 import { TabelaDetalhada } from "./componete/TabelaDetalhada";
+import MediaFreteEstadoChart from "./componete/MediaFreteEstadoChart";
 
 function parseDateBR(dateStr?: string) {
   if (!dateStr) return null;
@@ -49,6 +50,7 @@ export default function AnaliseTransporte() {
   const [statusFiltro, setStatusFiltro] = useState("");
   const [dark, setDark] = useState(false);
   const [kpiFiltro, setKpiFiltro] = useState("");
+  const [cnpjFiltro, setCnpjFiltro] = useState("");
 
   // ✅ FETCH SEGURO (NUNCA QUEBRA)
   useEffect(() => {
@@ -70,6 +72,10 @@ export default function AnaliseTransporte() {
         setLoading(false);
       });
   }, []);
+
+  const remetentesUnicos = Array.from(
+    new Set(data.map((d) => d.cnpjRemetente).filter(Boolean))
+  ).sort();
 
   // DARK MODE
   useEffect(() => {
@@ -109,6 +115,10 @@ export default function AnaliseTransporte() {
   }
   if (kpiFiltro === "ATRASADAS") {
     filtrado = filtrado.filter((d) => calcularAtraso(d) > 0);
+  }
+
+  if (cnpjFiltro) {
+    filtrado = filtrado.filter((d) => d.cnpjRemetente === cnpjFiltro);
   }
 
   // 🔥 MÉTRICAS AVANÇADAS
@@ -171,6 +181,7 @@ export default function AnaliseTransporte() {
     <div className="min-h-screen  bg-gray-200/40 dark:bg-gray-950/95 transition-colors ">
       <Loading isOpen={loading} text="Carregando Dados de Transporte" />
       {/* HEADER */}
+
       <AnaliseHeader
         mes={mes}
         setMes={setMes}
@@ -185,7 +196,11 @@ export default function AnaliseTransporte() {
         statusList={statusUnicos}
         dark={dark}
         setDark={setDark}
+        remetenteFiltro={cnpjFiltro}
+        setRemetenteFiltro={setCnpjFiltro}
+        remetentes={remetentesUnicos}
       />
+
       <div className="px-6">
         {/* KPI PRINCIPAIS */}
         <div className="grid grid-cols-5 gap-4 mb-6">
@@ -366,6 +381,8 @@ export default function AnaliseTransporte() {
             </ResponsiveContainer>
           </Card>
         </div>
+
+        <MediaFreteEstadoChart data={filtrado} />
 
         {/* INSIGHTS AUTOMÁTICOS */}
         <div className="grid grid-cols-3 gap-6 mb-6">
