@@ -26,6 +26,9 @@ import {
   Package,
   CheckCircle2,
   Clock,
+  TrendingUp,
+  Clock3,
+  PackageCheck,
 } from "lucide-react";
 import AnaliseHeader from "./componete/AnaliseHeader";
 import { TabelaDetalhada } from "./componete/TabelaDetalhada";
@@ -304,7 +307,7 @@ export default function AnaliseTransporte() {
                     backgroundColor: "var(--card-dark)",
                     border: "1px solid var(--card-border)",
                     borderRadius: "8px",
-                    color: "#fff",
+                    color: "oklch(0.55 0.015 240)",
                   }}
                 />
                 <Bar
@@ -373,7 +376,7 @@ export default function AnaliseTransporte() {
                     backgroundColor: "var(--card-dark)",
                     border: "1px solid var(--card-border)",
                     borderRadius: "8px",
-                    color: "#fff",
+                    color: "oklch(0.55 0.015 240)",
                   }}
                 />
                 <Bar dataKey="value" fill="oklch(0.65 0.24 264)" />
@@ -385,25 +388,31 @@ export default function AnaliseTransporte() {
         <MediaFreteEstadoChart data={filtrado} />
 
         {/* INSIGHTS AUTOMÁTICOS */}
-        <div className="grid grid-cols-3 gap-6 mb-6">
+        {/* INSIGHTS AUTOMÁTICOS */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
           <InsightCard
             title="Estados com Maior Volume"
+            subtitle="Regiões com maior movimentação logística"
             items={estadosData
-              .slice(0, 3)
+              .slice(0, 6)
               .map((item) => `${item.uf}: ${item.value} entregas`)}
             type="info"
           />
+
           <InsightCard
             title="Estados com Maior Atraso"
+            subtitle="Regiões críticas no prazo de entrega"
             items={metrics.topEstados
-              .slice(0, 3)
+              .slice(0, 6)
               .map((item) => `${item.name}: ${item.value} atrasos`)}
             type="error"
           />
+
           <InsightCard
             title="Status de Despacho"
+            subtitle="Situação atual das operações"
             items={statusData
-              .slice(0, 3)
+              .slice(0, 6)
               .map((item) => `${item.name}: ${item.value}`)}
             type="warning"
           />
@@ -463,33 +472,116 @@ function Card({ title, children }: any) {
   );
 }
 
-function InsightCard({ title, items, type }: any) {
-  const colorMap: any = {
-    success: "border-status-success bg-status-success/10",
-    error: "border-status-error bg-status-error/10",
-    warning: "border-status-warning bg-status-warning/10",
-    info: "border-status-info bg-status-info/10",
+function InsightCard({ title, items, type, subtitle }: any) {
+  const styles: any = {
+    success: {
+      border: "border-emerald-500",
+      bg: "bg-emerald-500/10",
+      iconBg: "bg-emerald-500/15",
+      iconColor: "text-emerald-500",
+      icon: <TrendingUp className="w-5 h-5" />,
+    },
+
+    error: {
+      border: "border-red-500",
+      bg: "bg-red-500/10",
+      iconBg: "bg-red-500/15",
+      iconColor: "text-red-500",
+      icon: <Clock3 className="w-5 h-5" />,
+    },
+
+    warning: {
+      border: "border-orange-500",
+      bg: "bg-orange-500/10",
+      iconBg: "bg-orange-500/15",
+      iconColor: "text-orange-500",
+      icon: <PackageCheck className="w-5 h-5" />,
+    },
+
+    info: {
+      border: "border-blue-500",
+      bg: "bg-blue-500/10",
+      iconBg: "bg-blue-500/15",
+      iconColor: "text-blue-500",
+      icon: <Truck className="w-5 h-5" />,
+    },
   };
+
+  const current = styles[type] || styles.info;
 
   return (
     <div
-      className={`border-l-4 p-4 rounded-card transition-colors ${
-        colorMap[type] || "border-gray-300 bg-gray-50 dark:bg-card-dark"
-      }`}
+      className={`
+        border-l-4
+        ${current.border}
+        ${current.bg}
+        rounded-3xl
+        p-5
+        transition-all duration-300
+        hover:shadow-lg
+        bg-white dark:bg-gray-800/50
+      `}
     >
-      <h3 className="font-semibold text-gray-800 dark:text-text-primary mb-2">
-        {title}
-      </h3>
-      <ul className="space-y-1">
-        {items.map((item: string, i: number) => (
-          <li
-            key={i}
-            className="text-sm text-gray-600 dark:text-text-secondary"
-          >
-            • {item}
-          </li>
-        ))}
-      </ul>
+      {/* HEADER */}
+      <div className="flex items-start gap-4 mb-5">
+        <div
+          className={`
+            w-12 h-12 rounded-2xl flex items-center justify-center
+            ${current.iconBg} ${current.iconColor}
+          `}
+        >
+          {current.icon}
+        </div>
+
+        <div>
+          <h3 className="font-bold text-gray-800 dark:text-white text-lg">
+            {title}
+          </h3>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {subtitle}
+          </p>
+        </div>
+      </div>
+
+      {/* LISTA */}
+      <div className="grid grid-cols-2 gap-3">
+        {/* COLUNA 1 */}
+        <ul className="space-y-1">
+          {items.slice(0, 3).map((item: string, i: number) => (
+            <li
+              key={i}
+              className="
+          flex items-center gap-3
+        "
+            >
+              <div className={`w-2.5 h-2.5 rounded-full ${current.iconBg}`} />
+
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {item}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        {/* COLUNA 2 */}
+        <ul className="space-y-1">
+          {items.slice(3, 6).map((item: string, i: number) => (
+            <li
+              key={i}
+              className="
+          flex items-center gap-3
+        "
+            >
+              <div className={`w-2.5 h-2.5 rounded-full ${current.iconBg}`} />
+
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {item}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
