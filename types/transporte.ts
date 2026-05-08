@@ -3,6 +3,7 @@ export type Transporte = {
   numConhecimento: string;
   numPedido: string;
   remetente: string;
+  cnpjRemetente: string;
   destinatario: string;
   dataEmissao: string;
   previsaoEntrega: string;
