@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import type { Transporte } from "@/types/transporte";
+import { ExternalLink, Eye } from "lucide-react";
 
 interface Props {
   dados: Transporte[];
@@ -28,6 +29,12 @@ export function TabelaDetalhada({ dados }: Props) {
     const inicio = (paginaAtual - 1) * itensPorPagina;
     return dados.slice(inicio, inicio + itensPorPagina);
   }, [dados, paginaAtual]);
+
+  function visualizarEncomenda(item: Transporte) {
+    if (!item.visualizarEncomenda) return;
+
+    window.open(item.visualizarEncomenda, "_blank");
+  }
 
   return (
     <div className="overflow-x-auto">
@@ -145,6 +152,12 @@ export function TabelaDetalhada({ dados }: Props) {
                 <td className="p-2 text-center text-gray-800 dark:text-text-primary">
                   {item.dataOcorrencia}
                 </td>
+                <button
+                  onClick={() => visualizarEncomenda(item)}
+                  className="group flex items-center rounded-md px-2 py-2 text-blue-600 dark:text-gray-400 hover:bg-gray-600 hover:text-white transition-all duration-300"
+                >
+                  <ExternalLink className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                </button>
               </tr>
             );
           })}

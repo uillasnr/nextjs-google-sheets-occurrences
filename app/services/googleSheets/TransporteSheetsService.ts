@@ -35,6 +35,7 @@ export class TransporteSheetsService {
       peso: row[23] || "",
       volume: row[24] || "",
       valorMercadoria: row[25] || "",
+      visualizarEncomenda: row[26] || "",
       mes: row[27] || "",
     }));
   }

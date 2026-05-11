@@ -21,5 +21,6 @@ export type Transporte = {
   peso: string;
   volume: string;
   valorMercadoria: string;
+  visualizarEncomenda?: string;
   mes: string;
 };
