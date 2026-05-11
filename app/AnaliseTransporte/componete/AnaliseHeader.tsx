@@ -1,6 +1,6 @@
 "use client";
 
-import { Moon, Sun, Filter, Truck, Building2 } from "lucide-react";
+import { Filter, Truck, Building2 } from "lucide-react";
 
 type Props = {
   mes: string;
@@ -14,8 +14,6 @@ type Props = {
   estados: string[];
   filiais: string[];
   statusList: string[];
-
->>>>>>> main
   remetenteFiltro: string;
   setRemetenteFiltro: (value: string) => void;
   remetentes: string[];
@@ -63,8 +61,6 @@ export default function AnaliseHeader({
   return (
     <div className="sticky top-0 z-50 bg-gray-200/95 dark:bg-gray-900 backdrop-blur-md px-6 pt-4 mb-6 shadow-lg border-b border-gray-200 dark:border-gray-800 pb-4 transition-colors">
       <div className="flex justify-between items-start gap-6 flex-wrap">
-        {/* ESQUERDA */}
-        {/* SEÇÃO SUPERIOR (ESQUERDA NO DESKTOP): Texto */}
         <div className="w-full xl:w-auto">
           <div className="inline-flex items-center gap-3 mb-2">
             <div className="bg-blue-500/10 dark:bg-blue-500/20 p-2 sm:p-3 rounded-2xl shadow-lg border border-blue-500/20 flex-shrink-0">
@@ -87,20 +83,9 @@ export default function AnaliseHeader({
           </p>
         </div>
 
-        {/* DIREITA */}
-<<<<<<< draft/old-pine
-        {/* Container de Filtros */}
-        {/* DIREITA: Área de Filtros */}
         <div className="flex-1 flex flex-col gap-4">
-          {/* LINHA SUPERIOR: Filtros Menores (Grid que se ajusta) */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full max-w-3xl ml-auto ">
             <div className="flex items-center text-gray-700 dark:text-text-secondary">
-=======
-        <div className="flex flex-col gap-2 lg:items-end">
-          {/* LINHA SUPERIOR */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-2 text-gray-700 dark:text-text-secondary">
->>>>>>> main
               <Filter className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground dark:text-gray-100 flex-shrink-0" />
               <span className="text-sm font-medium ">Filtros</span>
               <select
@@ -156,13 +141,7 @@ export default function AnaliseHeader({
             </select>
           </div>
 
-<<<<<<< draft/old-pine
-          {/* LINHA INFERIOR: Remetente alinhado totalmente à DIREITA */}
           <div className="flex justify-end items-center gap-2">
-=======
-          {/* 🔥 LINHA INFERIOR - REMETENTE */}
-          <div className="flex items-center gap-2">
->>>>>>> main
             <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground dark:text-gray-100 flex-shrink-0" />
             <select
               value={remetenteFiltro}
