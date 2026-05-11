@@ -1,6 +1,13 @@
 "use client";
 
-import { BarChart3, Search, Truck, X, Package } from "lucide-react";
+import {
+  BarChart3,
+  Search,
+  Truck,
+  X,
+  Package,
+  LineChartIcon,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useState } from "react";
@@ -49,7 +56,7 @@ export default function Sidebar({
       {/* Sidebar */}
       <aside
         className={`fixed top-0 right-0 h-full w-64 bg-white dark:bg-gray-900 
-        border-l border-gray-200 dark:border-gray-800 shadow-xl z-40
+        border-l border-gray-200 dark:border-gray-800 shadow-xl z-[60]
         transform transition-transform duration-300
         ${open ? "translate-x-0" : "translate-x-full"}`}
       >
@@ -129,7 +136,21 @@ export default function Sidebar({
             Buscar Ocorrências
           </button>
 
-           {/* 🆕 BOTÃO DE GERAR PDF - DESTAQUE NO TOPO */}
+          <button
+            onClick={() => {
+              router.push("/AnaliseTransporte");
+              setOpen(false);
+            }}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg
+  bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700
+  hover:bg-gray-300 dark:hover:bg-gray-700
+  transition-colors shadow-md text-sm dark:text-white"
+          >
+            <LineChartIcon className="w-5 h-5" />
+            Análise Entregas
+          </button>
+
+          {/* 🆕 BOTÃO DE GERAR PDF - DESTAQUE NO TOPO */}
           <div className="pb-4 border-b border-t pt-3 border-gray-200 dark:border-gray-700">
             <PDFReportButton occurrences={occurrences} sheet={sheet} />
           </div>
