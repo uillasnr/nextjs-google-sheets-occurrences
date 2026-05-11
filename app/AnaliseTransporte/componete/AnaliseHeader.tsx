@@ -14,7 +14,6 @@ type Props = {
   estados: string[];
   filiais: string[];
   statusList: string[];
-
   remetenteFiltro: string;
   setRemetenteFiltro: (value: string) => void;
   remetentes: string[];
