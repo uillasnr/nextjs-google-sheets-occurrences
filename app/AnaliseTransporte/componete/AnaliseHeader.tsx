@@ -14,8 +14,6 @@ type Props = {
   estados: string[];
   filiais: string[];
   statusList: string[];
-  dark: boolean;
-  setDark: (value: boolean) => void;
   remetenteFiltro: string;
   setRemetenteFiltro: (value: string) => void;
   remetentes: string[];
@@ -56,8 +54,6 @@ export default function AnaliseHeader({
   estados,
   filiais,
   statusList,
-  dark,
-  setDark,
   remetenteFiltro,
   setRemetenteFiltro,
   remetentes,
@@ -90,9 +86,9 @@ export default function AnaliseHeader({
         </div>
 
         {/* DIREITA */}
-        <div className="flex flex-col items-end gap-3">
+        <div className="flex flex-col gap-2 lg:items-end">
           {/* LINHA SUPERIOR */}
-          <div className="flex items-center gap-3 flex-wrap justify-end">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="flex items-center gap-2 text-gray-700 dark:text-text-secondary">
               <Filter className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground dark:text-gray-100 flex-shrink-0" />
               <span className="text-sm font-medium">Filtros</span>
@@ -155,22 +151,10 @@ export default function AnaliseHeader({
                 </option>
               ))}
             </select>
-
-            {/* DARK MODE */}
-            <button
-              onClick={() => setDark(!dark)}
-              className="p-2 rounded-full bg-white dark:bg-card-dark border border-gray-300 dark:border-card-border hover:bg-gray-50 dark:hover:bg-card-darker transition-colors"
-            >
-              {dark ? (
-                <Sun size={18} className="text-text-primary" />
-              ) : (
-                <Moon size={18} className="text-gray-600" />
-              )}
-            </button>
           </div>
 
           {/* 🔥 LINHA INFERIOR - REMETENTE */}
-          <div className="w-full flex justify-end flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground dark:text-gray-100 flex-shrink-0" />
             <select
               value={remetenteFiltro}
