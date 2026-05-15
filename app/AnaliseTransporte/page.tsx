@@ -35,6 +35,7 @@ import { TabelaDetalhada } from "./componete/TabelaDetalhada";
 import MediaFreteEstadoChart from "./componete/MediaFreteEstadoChart";
 import Sidebar from "../components/Sidebar";
 import { useRouter } from "next/navigation";
+import Footer from "@/components/Footer";
 
 function parseDateBR(dateStr?: string) {
   if (!dateStr) return null;
@@ -208,7 +209,7 @@ export default function AnaliseTransporte() {
           remetentes={remetentesUnicos}
         />
 
-        <div className="px-6">
+        <div className="px-6 mb-6">
           {/* KPI PRINCIPAIS */}
           <div className="grid grid-cols-5 gap-4 mb-6">
             <Kpi
@@ -427,6 +428,7 @@ export default function AnaliseTransporte() {
             <TabelaDetalhada dados={filtrado} />
           </Card>
         </div>
+        <Footer text=" Análise de Entregas Braspress" />
       </div>
     </>
   );
