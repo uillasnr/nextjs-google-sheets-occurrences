@@ -56,6 +56,7 @@ export default function AnaliseTransporte() {
   const [statusFiltro, setStatusFiltro] = useState("");
   const [kpiFiltro, setKpiFiltro] = useState("");
   const [cnpjFiltro, setCnpjFiltro] = useState("");
+  const [filtrosCarregados, setFiltrosCarregados] = useState(false);
   const router = useRouter();
 
   // ✅ FETCH SEGURO (NUNCA QUEBRA)
@@ -78,6 +79,41 @@ export default function AnaliseTransporte() {
         setLoading(false);
       });
   }, []);
+
+// ✅ CARREGAR FILTROS
+useEffect(() => {
+  const filtrosSalvos = localStorage.getItem("transporte-filtros");
+
+  if (filtrosSalvos) {
+    const filtros = JSON.parse(filtrosSalvos);
+
+    setMes(filtros.mes || "janeiro");
+    setEstadoFiltro(filtros.estadoFiltro || "");
+    setFilialFiltro(filtros.filialFiltro || "");
+    setStatusFiltro(filtros.statusFiltro || "");
+    setKpiFiltro(filtros.kpiFiltro || "");
+    setCnpjFiltro(filtros.cnpjFiltro || "");
+  }
+
+  setFiltrosCarregados(true);
+}, []);
+
+
+// ✅ SALVAR FILTROS
+useEffect(() => {
+  if (!filtrosCarregados) return;
+
+  localStorage.setItem("transporte-filtros", JSON.stringify({
+      mes,
+      estadoFiltro,
+      filialFiltro,
+      statusFiltro,
+      kpiFiltro,
+      cnpjFiltro,
+    })
+  );
+}, [ filtrosCarregados, mes, estadoFiltro, filialFiltro, statusFiltro, kpiFiltro, cnpjFiltro,]);
+
 
   const remetentesUnicos = Array.from(
     new Set(data.map((d) => d.cnpjRemetente).filter(Boolean))
