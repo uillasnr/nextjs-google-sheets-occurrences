@@ -62,7 +62,7 @@ export function Dashboard({ selectedBranch, occurrences }: DashboardProps) {
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(Number(e.target.value))}
-          className="w-fit rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
+          className="w-fit rounded-md border cursor-pointer border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
         >
           {years.map((year) => (
             <option key={year} value={year}>

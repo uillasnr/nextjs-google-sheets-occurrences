@@ -61,6 +61,7 @@ export default function AnaliseHeader({
   return (
     <div className="sticky top-0 z-50 bg-gray-200/95 dark:bg-gray-900 backdrop-blur-md px-6 pt-4 mb-6 shadow-lg border-b border-gray-200 dark:border-gray-800 pb-4 transition-colors">
       <div className="flex justify-between items-start gap-6 flex-wrap">
+        {/* ESQUERDA */}
         <div className="w-full xl:w-auto">
           <div className="inline-flex items-center gap-3 mb-2">
             <div className="bg-blue-500/10 dark:bg-blue-500/20 p-2 sm:p-3 rounded-2xl shadow-lg border border-blue-500/20 flex-shrink-0">
@@ -78,20 +79,25 @@ export default function AnaliseHeader({
               Análise de Entregas Braspress
             </h1>
           </div>
+
           <p className="text-xs md:text-sm lg:text-base text-gray-600 dark:text-gray-400">
             Dashboard de análise de entregas e prazos.
           </p>
         </div>
 
+        {/* DIREITA */}
         <div className="flex-1 flex flex-col gap-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full max-w-3xl ml-auto ">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full max-w-3xl ml-auto">
+            {/* FILTRO + MÊS */}
             <div className="flex items-center text-gray-700 dark:text-text-secondary">
               <Filter className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground dark:text-gray-100 flex-shrink-0" />
-              <span className="text-sm font-medium ">Filtros</span>
+
+              <span className="text-sm font-medium ml-2">Filtros</span>
+
               <select
                 value={mes}
                 onChange={(e) => setMes(e.target.value)}
-                className="W-full px-3 ml-2  text-center  py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full ml-2 px-3 py-2 text-center cursor-pointer border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
               >
                 {meses.map((m) => (
                   <option key={m} value={m}>
@@ -101,12 +107,14 @@ export default function AnaliseHeader({
               </select>
             </div>
 
+            {/* ESTADO */}
             <select
               value={estadoFiltro}
               onChange={(e) => setEstadoFiltro(e.target.value)}
-              className="w-full px-3 py-2 text-center  border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3 py-2 text-center cursor-pointer border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
             >
               <option value="">Todos Estados</option>
+
               {estados.map((uf) => (
                 <option key={uf} value={uf}>
                   {uf}
@@ -114,12 +122,14 @@ export default function AnaliseHeader({
               ))}
             </select>
 
+            {/* FILIAL */}
             <select
               value={filialFiltro}
               onChange={(e) => setFilialFiltro(e.target.value)}
-              className="w-full px-3 py-2 text-center  border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3 py-2 text-center cursor-pointer border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
             >
               <option value="">Todas Filiais</option>
+
               {filiais.map((filial) => (
                 <option key={filial} value={filial}>
                   {filial}
@@ -127,12 +137,14 @@ export default function AnaliseHeader({
               ))}
             </select>
 
+            {/* STATUS */}
             <select
               value={statusFiltro}
               onChange={(e) => setStatusFiltro(e.target.value)}
-              className="w-full px-3 text-center  py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3 py-2 text-center cursor-pointer border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
             >
               <option value="">Todos Status</option>
+
               {statusList.map((status) => (
                 <option key={status} value={status}>
                   {status}
@@ -141,14 +153,17 @@ export default function AnaliseHeader({
             </select>
           </div>
 
+          {/* REMETENTE */}
           <div className="flex justify-end items-center gap-2">
             <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground dark:text-gray-100 flex-shrink-0" />
+
             <select
               value={remetenteFiltro}
               onChange={(e) => setRemetenteFiltro(e.target.value)}
-              className="w-full md:w-64 px-3 text-center py-2 border-2 border-blue-500/20 dark:border-blue-500/40 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              className="w-full md:w-64 px-3 py-2 text-center cursor-pointer border-2 border-blue-500/20 dark:border-blue-500/40 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             >
               <option value="">Todas Filiais BR Motors</option>
+
               {remetentes.map((rem) => (
                 <option key={rem} value={rem}>
                   {remetentesMap[rem] || rem}

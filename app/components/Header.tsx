@@ -76,7 +76,7 @@ export default function Header({
                       | "Tocantins_SP"
                   )
                 }
-                className="flex-1 px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 cursor-pointer px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="SP">São Paulo - SP</option>
                 <option value="Tocantins_SP">Tocantins - SP</option>
