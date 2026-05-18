@@ -50,7 +50,7 @@ function parseDateBR(dateStr?: string) {
 export default function AnaliseTransporte() {
   const [data, setData] = useState<Transporte[]>([]);
   const [loading, setLoading] = useState(true);
-  const [mes, setMes] = useState("janeiro");
+  const [mes, setMes] = useState("");
   const [estadoFiltro, setEstadoFiltro] = useState("");
   const [filialFiltro, setFilialFiltro] = useState("");
   const [statusFiltro, setStatusFiltro] = useState("");
@@ -80,47 +80,59 @@ export default function AnaliseTransporte() {
       });
   }, []);
 
-// ✅ CARREGAR FILTROS
-useEffect(() => {
-  const filtrosSalvos = localStorage.getItem("transporte-filtros");
+  // ✅ CARREGAR FILTROS
+  useEffect(() => {
+    const filtrosSalvos = localStorage.getItem("transporte-filtros");
 
-  if (filtrosSalvos) {
-    const filtros = JSON.parse(filtrosSalvos);
+    if (filtrosSalvos) {
+      const filtros = JSON.parse(filtrosSalvos);
 
-    setMes(filtros.mes || "janeiro");
-    setEstadoFiltro(filtros.estadoFiltro || "");
-    setFilialFiltro(filtros.filialFiltro || "");
-    setStatusFiltro(filtros.statusFiltro || "");
-    setKpiFiltro(filtros.kpiFiltro || "");
-    setCnpjFiltro(filtros.cnpjFiltro || "");
-  }
+      setMes(filtros.mes || "");
+      setEstadoFiltro(filtros.estadoFiltro || "");
+      setFilialFiltro(filtros.filialFiltro || "");
+      setStatusFiltro(filtros.statusFiltro || "");
+      setKpiFiltro(filtros.kpiFiltro || "");
+      setCnpjFiltro(filtros.cnpjFiltro || "");
+    }
 
-  setFiltrosCarregados(true);
-}, []);
+    setFiltrosCarregados(true);
+  }, []);
 
+  // ✅ SALVAR FILTROS
+  useEffect(() => {
+    if (!filtrosCarregados) return;
 
-// ✅ SALVAR FILTROS
-useEffect(() => {
-  if (!filtrosCarregados) return;
-
-  localStorage.setItem("transporte-filtros", JSON.stringify({
-      mes,
-      estadoFiltro,
-      filialFiltro,
-      statusFiltro,
-      kpiFiltro,
-      cnpjFiltro,
-    })
-  );
-}, [ filtrosCarregados, mes, estadoFiltro, filialFiltro, statusFiltro, kpiFiltro, cnpjFiltro,]);
-
+    localStorage.setItem(
+      "transporte-filtros",
+      JSON.stringify({
+        mes,
+        estadoFiltro,
+        filialFiltro,
+        statusFiltro,
+        kpiFiltro,
+        cnpjFiltro,
+      })
+    );
+  }, [
+    filtrosCarregados,
+    mes,
+    estadoFiltro,
+    filialFiltro,
+    statusFiltro,
+    kpiFiltro,
+    cnpjFiltro,
+  ]);
 
   const remetentesUnicos = Array.from(
     new Set(data.map((d) => d.cnpjRemetente).filter(Boolean))
   ).sort();
 
   // FILTROS
-  let filtrado = data.filter((d) => (d.mes || "").toLowerCase() === mes);
+  let filtrado = data;
+
+  if (mes) {
+    filtrado = filtrado.filter((d) => (d.mes || "").toLowerCase() === mes);
+  }
 
   if (estadoFiltro) {
     filtrado = filtrado.filter((d) => d.ufDestino === estadoFiltro);

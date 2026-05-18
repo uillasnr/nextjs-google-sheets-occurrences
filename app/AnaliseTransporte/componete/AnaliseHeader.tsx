@@ -92,13 +92,14 @@ export default function AnaliseHeader({
             <div className="flex items-center text-gray-700 dark:text-text-secondary">
               <Filter className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground dark:text-gray-100 flex-shrink-0" />
 
-              <span className="text-sm font-medium ml-2">Filtros</span>
+              <span>Filtros</span>
 
               <select
                 value={mes}
                 onChange={(e) => setMes(e.target.value)}
-                className="w-full ml-2 px-3 py-2 text-center cursor-pointer border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full ml-2  py-2 text-center cursor-pointer border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
               >
+                <option value="">Todos Meses</option>
                 {meses.map((m) => (
                   <option key={m} value={m}>
                     {m}
@@ -111,7 +112,7 @@ export default function AnaliseHeader({
             <select
               value={estadoFiltro}
               onChange={(e) => setEstadoFiltro(e.target.value)}
-              className="w-full px-3 py-2 text-center cursor-pointer border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full  py-2 text-center cursor-pointer border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
             >
               <option value="">Todos Estados</option>
 
@@ -126,7 +127,7 @@ export default function AnaliseHeader({
             <select
               value={filialFiltro}
               onChange={(e) => setFilialFiltro(e.target.value)}
-              className="w-full px-3 py-2 text-center cursor-pointer border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full py-2 text-center cursor-pointer border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
             >
               <option value="">Todas Filiais</option>
 
@@ -141,7 +142,7 @@ export default function AnaliseHeader({
             <select
               value={statusFiltro}
               onChange={(e) => setStatusFiltro(e.target.value)}
-              className="w-full px-3 py-2 text-center cursor-pointer border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full py-2 text-center cursor-pointer border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
             >
               <option value="">Todos Status</option>
 
@@ -160,7 +161,7 @@ export default function AnaliseHeader({
             <select
               value={remetenteFiltro}
               onChange={(e) => setRemetenteFiltro(e.target.value)}
-              className="w-full md:w-64 px-3 py-2 text-center cursor-pointer border-2 border-blue-500/20 dark:border-blue-500/40 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              className="w-full md:w-64 py-2 text-center cursor-pointer border-2 border-blue-500/20 dark:border-blue-500/40 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             >
               <option value="">Todas Filiais BR Motors</option>
 
