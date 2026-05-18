@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import type { Transporte } from "@/types/transporte";
-import { ExternalLink, Eye } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 
 interface Props {
   dados: Transporte[];
@@ -21,14 +21,29 @@ function parseDateBR(dateStr?: string) {
 
 export function TabelaDetalhada({ dados }: Props) {
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [clienteFiltro, setClienteFiltro] = useState("");
+
   const itensPorPagina = 50;
 
-  const totalPaginas = Math.ceil(dados.length / itensPorPagina);
+  // 🔥 FILTRO POR CLIENTE
+  const dadosFiltrados = useMemo(() => {
+    return dados.filter((item) =>
+      item.destinatario?.toLowerCase().includes(clienteFiltro.toLowerCase())
+    );
+  }, [dados, clienteFiltro]);
+
+  // 🔥 RESETAR PAGINA AO FILTRAR
+  useEffect(() => {
+    setPaginaAtual(1);
+  }, [clienteFiltro]);
+
+  const totalPaginas = Math.ceil(dadosFiltrados.length / itensPorPagina);
 
   const dadosPaginados = useMemo(() => {
     const inicio = (paginaAtual - 1) * itensPorPagina;
-    return dados.slice(inicio, inicio + itensPorPagina);
-  }, [dados, paginaAtual]);
+
+    return dadosFiltrados.slice(inicio, inicio + itensPorPagina);
+  }, [dadosFiltrados, paginaAtual]);
 
   function visualizarEncomenda(item: Transporte) {
     if (!item.visualizarEncomenda) return;
@@ -38,41 +53,81 @@ export function TabelaDetalhada({ dados }: Props) {
 
   return (
     <div className="overflow-x-auto">
+      {/* 🔥 FILTRO CLIENTE */}
+      <div className=" flex justify-end">
+        <input
+          type="text"
+          placeholder="Filtrar cliente..."
+          value={clienteFiltro}
+          onChange={(e) => setClienteFiltro(e.target.value)}
+          className="
+            w-full md:w-80
+            px-4 py-2 mt-2 mr-2
+            rounded-lg
+            border
+            border-gray-300
+            dark:border-gray-700
+            bg-gray-200/95
+            dark:bg-gray-800
+            text-gray-900
+            dark:text-white
+            text-sm
+            outline-none
+            focus:ring-2
+            focus:ring-blue-500
+          "
+        />
+      </div>
+
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-gray-200 dark:border-card-border">
             <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
               NF
             </th>
+
             <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
               Cliente
             </th>
+
             <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
               UF Destino
             </th>
+
             <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
               Cidade
             </th>
+
             <th className="text-left p-2 text-center text-gray-700 dark:text-text-secondary">
               Status
             </th>
+
             <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
               Atraso (dias)
             </th>
-            <th className="text-left p-2  text-gray-700 dark:text-text-secondary">
+
+            <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
               Frete
             </th>
+
             <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
               Mercadoria
             </th>
+
             <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
               Emissão
             </th>
+
             <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
               Previsão
             </th>
+
             <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
               Ocorrência
+            </th>
+
+            <th className="text-left p-2 text-gray-700 dark:text-text-secondary">
+              Link
             </th>
           </tr>
         </thead>
@@ -95,7 +150,13 @@ export function TabelaDetalhada({ dados }: Props) {
             return (
               <tr
                 key={i}
-                className="border-b border-gray-100 dark:border-card-border hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                className="
+                  border-b border-gray-100
+                  dark:border-card-border
+                  hover:bg-gray-300
+                  dark:hover:bg-gray-500
+                  transition-colors
+                "
               >
                 <td className="p-2 text-gray-800 dark:text-text-primary">
                   {item.notaFiscal}
@@ -113,7 +174,7 @@ export function TabelaDetalhada({ dados }: Props) {
                   {item.cidadeDestino}
                 </td>
 
-                {/* STATUS COM ATRASO */}
+                {/* STATUS */}
                 <td className="p-2 text-center">
                   <span
                     className={`px-2 py-1 rounded text-xs font-medium ${
@@ -128,12 +189,12 @@ export function TabelaDetalhada({ dados }: Props) {
                   </span>
                 </td>
 
-                {/* DIAS DE ATRASO */}
+                {/* ATRASO */}
                 <td className="p-2 w-5 text-center text-xs text-gray-800 dark:text-text-primary">
                   {atrasado ? `${diasAtraso} dias` : "-"}
                 </td>
 
-                <td className="p-2  text-gray-800 dark:text-text-primary">
+                <td className="p-2 text-gray-800 dark:text-text-primary">
                   R$ {item.valorFrete}
                 </td>
 
@@ -152,12 +213,24 @@ export function TabelaDetalhada({ dados }: Props) {
                 <td className="p-2 text-center text-gray-800 dark:text-text-primary">
                   {item.dataOcorrencia}
                 </td>
-                <button
-                  onClick={() => visualizarEncomenda(item)}
-                  className="group flex items-center rounded-md px-2 py-2 text-blue-600 dark:text-gray-400 hover:bg-gray-600 hover:text-white transition-all duration-300"
-                >
-                  <ExternalLink className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                </button>
+
+                {/* LINK */}
+                <td className="p-2">
+                  <button
+                    onClick={() => visualizarEncomenda(item)}
+                    className="
+                      group flex items-center rounded-md
+                      px-2 py-2
+                      text-blue-600
+                      dark:text-gray-400
+                      hover:bg-gray-600
+                      hover:text-white
+                      transition-all duration-300
+                    "
+                  >
+                    <ExternalLink className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  </button>
+                </td>
               </tr>
             );
           })}
@@ -165,9 +238,9 @@ export function TabelaDetalhada({ dados }: Props) {
       </table>
 
       {/* INFO */}
-      {dados.length > 0 && (
+      {dadosFiltrados.length > 0 && (
         <p className="text-sm text-gray-500 dark:text-text-secondary mt-2">
-          Mostrando {dadosPaginados.length} de {dados.length} registros
+          Mostrando {dadosPaginados.length} de {dadosFiltrados.length} registros
         </p>
       )}
 
@@ -177,7 +250,12 @@ export function TabelaDetalhada({ dados }: Props) {
           <button
             onClick={() => setPaginaAtual((p) => Math.max(p - 1, 1))}
             disabled={paginaAtual === 1}
-            className="px-3 py-1 rounded text-white text-sm disabled:opacity-50 bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-800"
+            className="
+              px-3 py-1 rounded text-white text-sm
+              disabled:opacity-50
+              bg-blue-600 hover:bg-blue-600
+              dark:hover:bg-blue-800
+            "
           >
             Anterior
           </button>
@@ -189,7 +267,12 @@ export function TabelaDetalhada({ dados }: Props) {
           <button
             onClick={() => setPaginaAtual((p) => Math.min(p + 1, totalPaginas))}
             disabled={paginaAtual === totalPaginas}
-            className="px-3 py-1 rounded  text-sm text-white disabled:opacity-50 bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-800"
+            className="
+              px-3 py-1 rounded text-sm text-white
+              disabled:opacity-50
+              bg-blue-600 hover:bg-blue-600
+              dark:hover:bg-blue-800
+            "
           >
             Próxima
           </button>
