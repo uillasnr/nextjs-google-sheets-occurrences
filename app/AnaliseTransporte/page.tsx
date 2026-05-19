@@ -128,25 +128,44 @@ export default function AnaliseTransporte() {
   ).sort();
 
   // FILTROS
-  let filtrado = data;
+  // =====================================
+  // FILTROS BASE (SEM KPI)
+  // =====================================
+
+  let dadosBase = data;
 
   if (mes) {
-    filtrado = filtrado.filter((d) => (d.mes || "").toLowerCase() === mes);
+    dadosBase = dadosBase.filter((d) => (d.mes || "").toLowerCase() === mes);
   }
 
   if (estadoFiltro) {
-    filtrado = filtrado.filter((d) => d.ufDestino === estadoFiltro);
+    dadosBase = dadosBase.filter((d) => d.ufDestino === estadoFiltro);
   }
 
   if (filialFiltro) {
-    filtrado = filtrado.filter((d) => d.filialOrigem === filialFiltro);
+    dadosBase = dadosBase.filter((d) => d.filialOrigem === filialFiltro);
   }
 
   if (statusFiltro) {
-    filtrado = filtrado.filter((d) => d.status === statusFiltro);
+    dadosBase = dadosBase.filter((d) => d.status === statusFiltro);
   }
 
-  // 🔥 FILTRO POR KPI
+  if (cnpjFiltro) {
+    dadosBase = dadosBase.filter((d) => d.cnpjRemetente === cnpjFiltro);
+  }
+
+  // =====================================
+  // KPIs SEM FILTRO KPI
+  // =====================================
+
+  const metrics = useTransporteMetrics(dadosBase);
+
+  // =====================================
+  // FILTRO FINAL PARA TABELA/GRÁFICOS
+  // =====================================
+
+  let filtrado = [...dadosBase];
+
   if (kpiFiltro === "FINALIZADO") {
     filtrado = filtrado.filter((d) => d.status === "FINALIZADO");
   }
@@ -162,16 +181,12 @@ export default function AnaliseTransporte() {
       (d) => !d.dataOcorrencia && d.status !== "FINALIZADO"
     );
   }
+
   if (kpiFiltro === "ATRASADAS") {
     filtrado = filtrado.filter((d) => calcularAtraso(d) > 0);
   }
 
-  if (cnpjFiltro) {
-    filtrado = filtrado.filter((d) => d.cnpjRemetente === cnpjFiltro);
-  }
-
-  // 🔥 MÉTRICAS AVANÇADAS
-  const metrics = useTransporteMetrics(filtrado);
+  const notasAtrasadas = dadosBase.filter((d) => calcularAtraso(d) > 0).length;
 
   // 📊 DISTRIBUIÇÃO POR ESTADO (ordenado maior para menor)
   const estadosMap: Record<string, number> = {};
@@ -223,8 +238,6 @@ export default function AnaliseTransporte() {
 
     return diff > 0 ? Math.ceil(diff) : 0;
   }
-
-  const notasAtrasadas = filtrado.filter((d) => calcularAtraso(d) > 0).length;
 
   return (
     <>
@@ -574,7 +587,7 @@ function InsightCard({ title, items, type, subtitle }: any) {
         p-5
         transition-all duration-300
         hover:shadow-lg
-        bg-white dark:bg-gray-800/50
+        bg-white dark:bg-gray-800/50 shadow-card 
       `}
     >
       {/* HEADER */}
