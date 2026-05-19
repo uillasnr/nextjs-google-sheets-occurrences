@@ -233,7 +233,7 @@ export default function RankingFreteInteligente({ data }: Props) {
         </div>
       </div> */}
       {/* GRÁFICO */}
-      <div className="mb-6 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/50 p-6 shadow-sm">
+      <div className="mb-6 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/50 p-6  shadow-card">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             Ranking de Frete por Estado
