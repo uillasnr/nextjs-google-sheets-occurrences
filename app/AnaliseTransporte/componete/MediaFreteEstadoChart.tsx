@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { Transporte } from "@/types/transporte";
 
 import {
@@ -14,41 +14,41 @@ import {
   Cell,
 } from "recharts";
 
-import { TrendingUp, TrendingDown, BadgeDollarSign } from "lucide-react";
-
 type Props = {
   data: Transporte[];
 };
 
+type ModoVisao = "participacao" | "comparativo";
+
 export default function RankingFreteInteligente({ data }: Props) {
+  const [modo, setModo] = useState<ModoVisao>("participacao");
+
+  // 🔥 CONVERTER VALOR COM TRATAMENTO DE ERRO
+  function converterValor(valor: string | number | null | undefined): number {
+    if (!valor) return 0;
+    if (typeof valor === "number") return valor;
+
+    const texto = String(valor).trim();
+    if (texto.includes(",")) {
+      return parseFloat(texto.replace(/\./g, "").replace(",", "."));
+    }
+    return parseFloat(texto) || 0;
+  }
+
   const analytics = useMemo(() => {
-    const estados: Record<
-      string,
-      {
-        totalFrete: number;
-        quantidade: number;
-      }
-    > = {};
+    const safeData = Array.isArray(data) ? data : [];
+    const estados: Record<string, { totalFrete: number; quantidade: number }> =
+      {};
 
     let totalFreteBrasil = 0;
     let totalEntregasBrasil = 0;
 
-    data.forEach((item) => {
+    safeData.forEach((item) => {
       const uf = item.ufDestino || "N/A";
-
-      const frete = parseFloat(
-        String(item.valorFrete || "0")
-          .replace(/\./g, "")
-          .replace(",", ".")
-      );
-
-      const valorFrete = isNaN(frete) ? 0 : frete;
+      const valorFrete = converterValor(item.valorFrete);
 
       if (!estados[uf]) {
-        estados[uf] = {
-          totalFrete: 0,
-          quantidade: 0,
-        };
+        estados[uf] = { totalFrete: 0, quantidade: 0 };
       }
 
       estados[uf].totalFrete += valorFrete;
@@ -63,325 +63,257 @@ export default function RankingFreteInteligente({ data }: Props) {
 
     const ranking = Object.entries(estados)
       .map(([uf, values]) => {
-        const media = values.totalFrete / values.quantidade;
+        const mediaEstado =
+          values.quantidade > 0 ? values.totalFrete / values.quantidade : 0;
 
-        const percentual =
-          mediaNacional > 0
-            ? ((media - mediaNacional) / mediaNacional) * 100
+        // % de participação sobre o faturamento total nacional
+        const percentualParticipacao =
+          totalFreteBrasil > 0
+            ? (values.totalFrete / totalFreteBrasil) * 100
             : 0;
 
-        const acimaMedia = percentual > 0;
+        // % de desvio em relação à média nacional
+        const percentualComparativo =
+          mediaNacional > 0
+            ? ((mediaEstado - mediaNacional) / mediaNacional) * 100
+            : 0;
+
+        // Define o valor numérico que o gráfico vai plotar
+        const valorGrafico =
+          modo === "participacao"
+            ? percentualParticipacao
+            : percentualComparativo;
+
+        // 🔥 LÓGICA DE CORES REFINADA (Baseada no desvio da média ou tamanho da participação)
+        let color = "#22c55e"; // Verde padrão (dentro do esperado ou abaixo da média)
+
+        if (modo === "comparativo") {
+          if (percentualComparativo > 15) color = "#ef4444"; // Vermelho
+          else if (percentualComparativo > 5) color = "#f97316"; // Laranja
+          else if (percentualComparativo < -15) color = "#3b82f6"; // Azul
+        } else {
+          if (percentualParticipacao > 10) color = "#ef4444";
+          else if (percentualParticipacao > 5) color = "#f97316";
+        }
 
         return {
           uf,
-          media,
-          percentual,
+          media: mediaEstado,
+          valorGrafico,
+          percentualParticipacao,
+          percentualComparativo,
           quantidade: values.quantidade,
           totalFrete: values.totalFrete,
-          status: acimaMedia
-            ? `${percentual.toFixed(1)}% acima da média`
-            : `${Math.abs(percentual).toFixed(1)}% abaixo da média`,
-          color:
-            percentual > 40
-              ? "#ef4444"
-              : percentual > 0
-              ? "#f97316"
-              : "#22c55e",
+          color,
         };
       })
-      .sort((a, b) => b.media - a.media);
+      // Ordena pelo maior valor exibido no momento
+      .sort((a, b) => b.valorGrafico - a.valorGrafico);
 
     return {
       ranking,
       mediaNacional,
+      totalFreteBrasil,
       totalEntregasBrasil,
     };
-  }, [data]);
+  }, [data, modo]);
 
   return (
-    <div className="space-y-6">
-      {/* KPIs CLEAN / PREMIUM */}
-      {/*   <div className="grid grid-cols-1 md:grid-cols-3 gap-5"> */}
-      {/* CARD 1 */}
-      {/*  <div className="group relative overflow-hidden rounded-[28px] border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"> */}
-      {/* TOP */}
-      {/*  <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                Ticket Médio Nacional
-              </p>
+    <div className="space-y-6 mb-6">
+      <div className="rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/50 p-6 shadow-sm">
+        {/* HEADER DO COMPONENTE */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              Ranking de Frete por Estado
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {modo === "participacao"
+                ? "Participação percentual de cada estado e custo total do frete."
+                : "Desvio percentual do ticket médio do estado em relação à média Total."}
+            </p>
+          </div>
 
-              <div className="flex items-end gap-2">
-                <h2 className="text-xl font-black tracking-tight text-gray-900 dark:text-white">
-                  R$
-                </h2>
+          {/* CONTROLE DE ALTERNÂNCIA (TOGGLE DOS MODOS) */}
+          <div className="inline-flex rounded-xl bg-gray-100 dark:bg-gray-800 p-1 self-start sm:self-center">
+            <button
+              onClick={() => setModo("participacao")}
+              className={`px-4 py-2 text-xs font-medium rounded-lg transition-all ${
+                modo === "participacao"
+                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              }`}
+            >
+              Participação %
+            </button>
+            <button
+              onClick={() => setModo("comparativo")}
+              className={`px-4 py-2 text-xs font-medium rounded-lg transition-all ${
+                modo === "comparativo"
+                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              }`}
+            >
+              Comparativo Médio
+            </button>
+          </div>
+        </div>
 
-                <h1 className="text-xl font-black tracking-tight text-gray-900 dark:text-white">
-                  {analytics.mediaNacional.toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                  })}
-                </h1>
-              </div>
-            </div> */}
-
-      {/* ICON */}
-      {/*  <div className="relative">
-              <div className="absolute inset-0 rounded-3xl bg-blue-500 blur-xl opacity-20 group-hover:opacity-40 transition-all" />
-
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-3xl bg-blue-500 text-white">
-                <BadgeDollarSign className="w-8 h-8" />
-              </div>
-            </div>
-          </div> */}
-
-      {/* BOTTOM */}
-      {/*  <div className="mt-8 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-
-              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                Média logística nacional
+        {/* LEGENDAS DINÂMICAS */}
+        <div className="mb-6 flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-800 pb-4">
+          {modo === "comparativo" ? (
+            <>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500" />{" "}
+                Criticamente Acima (+15%)
               </span>
-            </div>
-
-            <div className="rounded-full bg-blue-50 dark:bg-blue-950/30 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400">
-              Financeiro
-            </div>
-          </div>
-        </div> */}
-
-      {/* CARD 2 */}
-      {/*   <div className="group relative overflow-hidden rounded-[28px] border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                Entregas Analisadas
-              </p>
-
-              <div className="flex items-end gap-2">
-                <h1 className="text-xl font-black tracking-tight text-gray-900 dark:text-white">
-                  {analytics.totalEntregasBrasil}
-                </h1>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 rounded-3xl bg-green-500 blur-xl opacity-20 group-hover:opacity-40 transition-all" />
-
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-3xl bg-green-500 text-white">
-                <TrendingUp className="w-8 h-8" />
-              </div>
-            </div>
-          </div> */}
-
-      {/* MINI BARS */}
-      {/*   <div className="mt-8 space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-500">Monitoramento</span>
-
-              <span className="font-semibold text-green-500">100%</span>
-            </div>
-
-            <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
-              <div className="h-full w-full rounded-full bg-green-500" />
-            </div>
-          </div>
-        </div> */}
-
-      {/* CARD 3 */}
-      {/*  <div className="group relative overflow-hidden rounded-[28px] border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                Estados Monitorados
-              </p>
-
-              <div className="flex items-end gap-2">
-                <h1 className="text-lg  font-black tracking-tight text-gray-900 dark:text-white">
-                  {analytics.ranking.length}
-                </h1>
-
-                <span className="mb-2 text-lg font-semibold text-gray-400">
-                  UFs
-                </span>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 rounded-3xl bg-orange-500 blur-xl opacity-20 group-hover:opacity-40 transition-all" />
-
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-3xl bg-orange-500 text-white">
-                <TrendingDown className="w-8 h-8" />
-              </div>
-            </div>
-          </div> */}
-
-      {/* FOOTER */}
-      {/*   <div className="mt-8 flex items-center justify-between rounded-2xl bg-orange-50 dark:bg-orange-950/20 p-3">
-            <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Cobertura nacional
-              </p>
-
-              <h3 className="text-sm font-bold text-orange-500">
-                Dados ativos
-              </h3>
-            </div>
-
-            <div className="h-3 w-3 rounded-full bg-orange-500 animate-pulse" />
-          </div>
-        </div>
-      </div> */}
-      {/* GRÁFICO */}
-      <div className="mb-6 rounded-3xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800/50 p-6  shadow-card">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Ranking de Frete por Estado
-          </h2>
-
-          <p className="text-sm text-gray-500 mt-1">
-            Comparativo do ticket médio de frete.
-          </p>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-orange-500" />{" "}
+                Acima da Média
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-green-500" />{" "}
+                Abaixo/Na Média
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500" /> Muito
+                Abaixo (-15%)
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500" /> Alta
+                Relevância (+10%)
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-orange-500" />{" "}
+                Média Relevância (+5%)
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-green-500" /> Baixa
+                Participação (-10%)
+              </span>
+            </>
+          )}
         </div>
 
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={analytics.ranking}>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="rgba(120,120,120,0.12)"
-            />
+        {/* CONTAINER DO GRÁFICO */}
+        <div className="w-100 h-[180px]">
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart
+              data={analytics.ranking}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="rgba(120,120,120,0.08)"
+                vertical={false}
+              />
 
-            <XAxis
-              dataKey="uf"
-              tickLine={false}
-              axisLine={false}
-              tick={{ fontSize: 13 }}
-            />
+              <XAxis
+                dataKey="uf"
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 12, fill: "#6b7280" }}
+              />
 
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tick={{ fontSize: 10 }}
-              width={30}
-              tickFormatter={(value) =>
-                `R$ ${Number(value).toLocaleString("pt-BR")}`
-              }
-            />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 11, fill: "#6b7280" }}
+                tickFormatter={(value) => `${Number(value).toFixed(0)}%`}
+              />
 
-            <Tooltip
-              cursor={{
-                fill: "rgba(120,120,120,0.08)",
-              }}
-              content={({ active, payload }) => {
-                if (!active || !payload || !payload.length) {
-                  return null;
-                }
+              <Tooltip
+                cursor={{ fill: "rgba(120,120,120,0.05)" }}
+                content={({ active, payload }) => {
+                  if (!active || !payload || !payload.length) return null;
 
-                const item = payload[0].payload;
+                  const item = payload[0].payload;
 
-                return (
-                  <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 shadow-2xl min-w-[280px]">
-                    {/* UF */}
-                    <div className="flex items-center justify-between mb-4">
+                  return (
+                    <div className="rounded-2xl border  border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 shadow-xl min-w-[260px] space-y-3">
+                      {/* Estado e Entregas */}
+                      <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-2">
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                            {item.uf}
+                          </h3>
+                          <p className="text-xs text-gray-400">
+                            {item.quantidade} entregas
+                          </p>
+                        </div>
+                        <span
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: item.color }}
+                        />
+                      </div>
+
+                      {/* Informações de Ticket Médio */}
                       <div>
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                          {item.uf}
-                        </h3>
-
-                        <p className="text-sm text-gray-500">
-                          {item.quantidade} entregas analisadas
+                        <p className="text-xs text-gray-400 mb-0.5">
+                          Ticket Médio do Estado
+                        </p>
+                        <p className="text-xl font-bold text-gray-900 dark:text-white">
+                          {item.media.toLocaleString("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          })}
                         </p>
                       </div>
 
-                      <div
-                        className="w-4 h-4 rounded-full"
-                        style={{
-                          backgroundColor: item.color,
-                        }}
-                      />
+                      {/* Métricas Dinâmicas do Modo ativo */}
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+                          <p className="text-[10px] text-gray-400 uppercase font-semibold">
+                            Participação
+                          </p>
+                          <p className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                            {item.percentualParticipacao.toFixed(2)}%
+                          </p>
+                        </div>
+                        <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+                          <p className="text-[10px] text-gray-400 uppercase font-semibold">
+                            Vs. Média Tot.
+                          </p>
+                          <p
+                            className={`text-sm font-bold ${
+                              item.percentualComparativo >= 0
+                                ? "text-orange-500"
+                                : "text-green-500"
+                            }`}
+                          >
+                            {item.percentualComparativo >= 0 ? "+" : ""}
+                            {item.percentualComparativo.toFixed(1)}%
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Total Acumulado */}
+                      <div className="pt-1 text-xs text-gray-400 flex justify-between">
+                        <span>Total gasto: </span>
+                        <span className="font-semibold text-gray-700 dark:text-gray-300">
+                          {item.totalFrete.toLocaleString("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          })}
+                        </span>
+                      </div>
                     </div>
+                  );
+                }}
+              />
 
-                    {/* VALOR */}
-                    <div className="mb-4">
-                      <p className="text-sm text-gray-500 mb-1">
-                        Média do estado Frete
-                      </p>
-
-                      <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        R${" "}
-                        {item.media.toLocaleString("pt-BR", {
-                          minimumFractionDigits: 2,
-                        })}
-                      </h2>
-                    </div>
-
-                    {/* PERCENTUAL */}
-                    <div className="flex items-center gap-2 mb-4">
-                      <span
-                        className={`text-lg font-bold ${
-                          item.percentual > 0
-                            ? "text-red-500"
-                            : "text-green-500"
-                        }`}
-                      >
-                        {item.percentual > 0 ? "+" : ""}
-                        {item.percentual.toFixed(1)}%
-                      </span>
-
-                      <span className="text-sm text-gray-500">
-                        {item.percentual > 0
-                          ? "Acima da média"
-                          : "Abaixo da média"}
-                      </span>
-                    </div>
-
-                    {/* MÉDIA BRASIL */}
-                    <div className="rounded-xl bg-gray-100 dark:bg-gray-800 p-3">
-                      <p className="text-xs text-gray-500 mb-1">Média Mês</p>
-
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        R${" "}
-                        {analytics.mediaNacional.toLocaleString("pt-BR", {
-                          minimumFractionDigits: 2,
-                        })}
-                      </p>
-                    </div>
-
-                    {/* STATUS */}
-                    {/*      <div className="mt-4 text-sm">
-                      <span
-                        className={`font-semibold ${
-                          item.percentual > 0
-                            ? "text-red-500"
-                            : "text-green-500"
-                        }`}
-                      >
-                        {item.status}
-                      </span>
-                    </div> */}
-
-                    <p className="text-xs text-gray-500 mb-1 mt-2">
-                      Total gasto no estado
-                    </p>
-
-                    <p className="font-bold text-gray-900 dark:text-white">
-                      R${" "}
-                      {item.totalFrete.toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </p>
-                  </div>
-                );
-              }}
-            />
-
-            <Bar dataKey="media" radius={[12, 12, 0, 0]}>
-              {analytics.ranking.map((item, index) => (
-                <Cell key={index} fill={item.color} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+              {/* BARRA DO GRÁFICO - MAPEANDO DINAMICAMENTE O VALOR DO MODO */}
+              <Bar dataKey="valorGrafico" radius={[6, 6, 0, 0]}>
+                {analytics.ranking.map((item, index) => (
+                  <Cell key={`cell-${index}`} fill={item.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );
