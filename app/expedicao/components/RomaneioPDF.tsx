@@ -1,10 +1,4 @@
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-} from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { Expedicao } from "@/types/Expedicao";
 import { formatDateBR } from "@/lib/formatDate";
 
@@ -13,14 +7,12 @@ const styles = StyleSheet.create({
     paddingTop: 32,
     paddingLeft: 32,
     paddingRight: 32,
-    paddingBottom: 140, // espaço reservado para o rodapé fixo
+    paddingBottom: 140,
     fontSize: 11,
     fontFamily: "Helvetica",
     backgroundColor: "#ffffff",
     position: "relative",
   },
-
-  /* ================= HEADER ================= */
 
   header: {
     marginBottom: 18,
@@ -40,8 +32,6 @@ const styles = StyleSheet.create({
     color: "#6b7280",
     marginTop: 4,
   },
-
-  /* ================= INFO BOX ================= */
 
   infoBox: {
     marginTop: 12,
@@ -67,8 +57,6 @@ const styles = StyleSheet.create({
     color: "#111827",
   },
 
-  /* ================= TABELA ================= */
-
   tableHeader: {
     flexDirection: "row",
     backgroundColor: "#1f2937",
@@ -79,6 +67,16 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
 
+  groupHeader: {
+    backgroundColor: "#E5E7EB",
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    fontSize: 11,
+    fontWeight: "bold",
+    color: "#111827",
+    marginTop: 8,
+  },
+
   tableRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -87,11 +85,18 @@ const styles = StyleSheet.create({
     borderBottom: "1 solid #e5e7eb",
   },
 
-  colNota: { width: "30%" },
-  colData: { width: "35%" },
-  colVolumes: { width: "35%", textAlign: "right" },
+  colNota: {
+    width: "35%",
+  },
 
-  /* ================= RODAPÉ FIXO ================= */
+  colData: {
+    width: "35%",
+  },
+
+  colVolumes: {
+    width: "30%",
+    textAlign: "right",
+  },
 
   footer: {
     position: "absolute",
@@ -161,6 +166,12 @@ type Props = {
   responsavelExpedicao: string;
 };
 
+const ITEMS_PER_PAGE = 18;
+
+type LinhaRomaneio =
+  | { tipo: "cliente"; cliente: string }
+  | { tipo: "nota"; nota: Expedicao };
+
 export function RomaneioPDF({
   cliente,
   notas,
@@ -174,29 +185,72 @@ export function RomaneioPDF({
     0
   );
 
-  const ITEMS_PER_PAGE = 18; // reduzido para não invadir o rodapé
+  // Agrupar por cliente
+  const grupos = Object.values(
+    notas.reduce(
+      (acc, nf) => {
+        const nomeCliente = nf.cliente || "SEM CLIENTE";
 
-  const pages = [];
-  for (let i = 0; i < notas.length; i += ITEMS_PER_PAGE) {
-    pages.push(notas.slice(i, i + ITEMS_PER_PAGE));
+        if (!acc[nomeCliente]) {
+          acc[nomeCliente] = {
+            cliente: nomeCliente,
+            notas: [],
+          };
+        }
+
+        acc[nomeCliente].notas.push(nf);
+
+        return acc;
+      },
+      {} as Record<
+        string,
+        {
+          cliente: string;
+          notas: Expedicao[];
+        }
+      >
+    )
+  );
+
+  // Transformar em linhas
+  const linhas: LinhaRomaneio[] = [];
+
+  grupos.forEach((grupo) => {
+    linhas.push({
+      tipo: "cliente",
+      cliente: grupo.cliente,
+    });
+
+    grupo.notas.forEach((nota) => {
+      linhas.push({
+        tipo: "nota",
+        nota,
+      });
+    });
+  });
+
+  // Paginação
+  const pages: LinhaRomaneio[][] = [];
+
+  for (let i = 0; i < linhas.length; i += ITEMS_PER_PAGE) {
+    pages.push(linhas.slice(i, i + ITEMS_PER_PAGE));
   }
 
   return (
     <Document>
-      {pages.map((notasPagina, pageIndex) => {
+      {pages.map((itensPagina, pageIndex) => {
         const isLastPage = pageIndex === pages.length - 1;
 
         return (
           <Page key={pageIndex} size="A4" style={styles.page}>
-            {/* HEADER */}
             <View style={styles.header}>
               <Text style={styles.title}>ROMANEIO DE CARGA</Text>
+
               <Text style={styles.subtitle}>
                 Documento de conferência e transporte de mercadorias
               </Text>
             </View>
 
-            {/* INFO apenas na primeira página */}
             {pageIndex === 0 && (
               <View style={styles.infoBox}>
                 <View style={styles.rowBetween}>
@@ -204,10 +258,11 @@ export function RomaneioPDF({
                     <Text style={styles.label}>Cliente: </Text>
                     <Text style={styles.value}>{cliente}</Text>
                   </Text>
+
                   <Text>
                     <Text style={styles.label}>Data: </Text>
                     <Text style={styles.value}>
-                       {new Date().toLocaleDateString("pt-BR")}
+                      {new Date().toLocaleDateString("pt-BR")}
                     </Text>
                   </Text>
                 </View>
@@ -217,6 +272,7 @@ export function RomaneioPDF({
                     <Text style={styles.label}>Placa: </Text>
                     <Text style={styles.value}>{placaVeiculo}</Text>
                   </Text>
+
                   <Text>
                     <Text style={styles.label}>Motorista: </Text>
                     <Text style={styles.value}>{nomeMotorista}</Text>
@@ -228,6 +284,7 @@ export function RomaneioPDF({
                     <Text style={styles.label}>CPF: </Text>
                     <Text style={styles.value}>{cpfMotorista}</Text>
                   </Text>
+
                   <Text>
                     <Text style={styles.label}>Total NFs: </Text>
                     <Text style={styles.value}>{notas.length}</Text>
@@ -236,24 +293,39 @@ export function RomaneioPDF({
               </View>
             )}
 
-            {/* TABELA */}
             <View style={styles.tableHeader}>
               <Text style={styles.colNota}>Nota Fiscal</Text>
               <Text style={styles.colData}>Data</Text>
               <Text style={styles.colVolumes}>Volumes</Text>
             </View>
 
-            {notasPagina.map((nf) => (
-              <View key={nf.id} style={styles.tableRow}>
-                <Text style={styles.colNota}>{nf.nota}</Text>
-                <Text style={styles.colData}>
-                  {formatDateBR(nf.dataNota)}
-                </Text>
-                <Text style={styles.colVolumes}>{nf.volumes}</Text>
-              </View>
-            ))}
+            {itensPagina.map((item, index) => {
+              if (item.tipo === "cliente") {
+                return (
+                  <View
+                    key={`cliente-${item.cliente}-${index}`}
+                    style={styles.groupHeader}
+                  >
+                    <Text>{item.cliente}</Text>
+                  </View>
+                );
+              }
 
-            {/* RODAPÉ FIXO apenas na última página */}
+              const nf = item.nota;
+
+              return (
+                <View key={nf.id} style={styles.tableRow}>
+                  <Text style={styles.colNota}>{nf.nota}</Text>
+
+                  <Text style={styles.colData}>
+                    {formatDateBR(nf.dataNota)}
+                  </Text>
+
+                  <Text style={styles.colVolumes}>{nf.volumes}</Text>
+                </View>
+              );
+            })}
+
             {isLastPage && (
               <View style={styles.footer}>
                 <View style={styles.totalBox}>
@@ -271,10 +343,9 @@ export function RomaneioPDF({
                 <View style={styles.assinaturaContainer}>
                   <View style={styles.assinaturaBox}>
                     <View style={styles.linhaAssinatura}>
-                      <Text style={styles.nomeAssinatura}>
-                        {nomeMotorista}
-                      </Text>
+                      <Text style={styles.nomeAssinatura}>{nomeMotorista}</Text>
                     </View>
+
                     <Text style={styles.labelAssinatura}>
                       Assinatura do Motorista
                     </Text>
@@ -286,6 +357,7 @@ export function RomaneioPDF({
                         {responsavelExpedicao}
                       </Text>
                     </View>
+
                     <Text style={styles.labelAssinatura}>
                       Assinatura do Responsável
                     </Text>
