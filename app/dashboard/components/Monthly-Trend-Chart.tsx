@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import { CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
-import { groupOccurrencesByMonth } from "../services/googleSheets/helpers";
+import { groupOccurrencesByMonth } from "../../services/googleSheets/helpers";
 import type { Occurrence } from "@/types/occurrence";
 
 interface Props {

@@ -8,9 +8,11 @@ import { useState } from "react";
 import {
   getAvailableYears,
   groupOccurrencesByTransportadora,
+  groupOccurrencesByState,
   groupOccurrencesByType,
-} from "../services/googleSheets/helpers";
+} from "../../services/googleSheets/helpers";
 import { OccurrenceTypeByTransportadoraChart } from "./occurrence-type-by-transportadora-chart";
+import { OccurrenceStateChart } from "./occurrence-state-chart";
 import Footer from "@/components/Footer";
 
 interface DashboardProps {
@@ -37,6 +39,7 @@ export function Dashboard({ selectedBranch, occurrences }: DashboardProps) {
     occurrences,
     selectedYear
   );
+  const byStateData = groupOccurrencesByState(occurrences, selectedYear);
 
   const hasOccurrences = occurrences.length > 0;
 
@@ -44,6 +47,8 @@ export function Dashboard({ selectedBranch, occurrences }: DashboardProps) {
 
   const hasByTransportadoraData =
     byTransportadoraData && Object.keys(byTransportadoraData).length > 0;
+
+  const hasStateData = byStateData && byStateData.length > 0;
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto px-4">
@@ -85,15 +90,23 @@ export function Dashboard({ selectedBranch, occurrences }: DashboardProps) {
         </div>
       )}
 
-      {/* Gráfico 3 centralizado */}
-      {hasByTransportadoraData && (
-        <div className="flex justify-center pb-10">
-          <Card className="w-full lg:max-w-6xl border border-gray-300 dark:border-gray-600 rounded-lg p-6">
-            <OccurrenceTypeByTransportadoraChart
-              data={byTransportadoraData}
-              year={selectedYear}
-            />
-          </Card>
+      {/* Gráfico 3 e 4 */}
+      {(hasByTransportadoraData || hasStateData) && (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 pb-10">
+          {hasByTransportadoraData && (
+            <Card className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-6">
+              <OccurrenceTypeByTransportadoraChart
+                data={byTransportadoraData}
+                year={selectedYear}
+              />
+            </Card>
+          )}
+
+          {hasStateData && (
+            <Card className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-6">
+              <OccurrenceStateChart data={byStateData} year={selectedYear} />
+            </Card>
+          )}
         </div>
       )}
 

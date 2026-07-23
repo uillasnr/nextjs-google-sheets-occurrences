@@ -1,33 +1,31 @@
 "use client";
 
-import { Package } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Occurrence } from "@/types/occurrence";
 
-import Stats from "@/app/components/Stats";
-import OccurrenceModal from "@/app/components/OccurrenceModal";
+import { Dashboard } from "./components/dashboard";
 import Header from "@/app/components/Header";
 import Loading from "@/components/Loading";
-import OccurrenceCard from "./components/OccurrenceCard";
-import SearchResultModal from "./components/SearchResultModal";
-import Footer from "@/components/Footer";
+import OccurrenceModal from "@/app/components/OccurrenceModal";
+import SearchResultModal from "@/app/components/SearchResultModal";
 
-export default function Home() {
+export default function DashboardPage() {
+  const router = useRouter();
   const [list, setList] = useState<Occurrence[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOccurrence, setEditingOccurrence] = useState<Occurrence | null>(
     null
   );
-  const router = useRouter();
-  const [sheet, setSheet] = useState<"SP" | "PE" | "ES" | "Fábrica" | "Tocantins_SP">("SP");
+  const [sheet, setSheet] = useState<
+    "SP" | "PE" | "ES" | "Fábrica" | "Tocantins_SP"
+  >("SP");
   const [statusFilter, setStatusFilter] = useState<
     "Todos" | "Pendente" | "Em Andamento" | "Resolvido"
   >("Pendente");
   const [searchedOccurrence, setSearchedOccurrence] =
     useState<Occurrence | null>(null);
-
   const [isSearchResultOpen, setIsSearchResultOpen] = useState(false);
 
   const handleSearchByNF = (nf: string): boolean => {
@@ -46,11 +44,6 @@ export default function Home() {
     setIsSearchResultOpen(false);
     setSearchedOccurrence(null);
   };
-
-  const filteredList = list.filter((item) => {
-    if (statusFilter === "Todos") return true;
-    return item.status === statusFilter;
-  });
 
   const fetchOccurrences = async () => {
     try {
@@ -133,51 +126,13 @@ export default function Home() {
         onNew={handleNew}
         onSearchNF={handleSearchByNF}
         onClearSearch={closeSearchResult}
-        goToHome={() => {
-          closeSearchResult();
-          router.push("/");
-        }}
+        goToHome={() => router.push("/")}
         goToDashboard={() => router.push("/dashboard")}
-          occurrences={list}
+        occurrences={list}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-6">
-        <Stats
-          list={list}
-          activeFilter={statusFilter}
-          onFilterChange={setStatusFilter}
-        />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredList.length > 0
-            ? filteredList.map((item) => (
-                <OccurrenceCard
-                  key={item.id}
-                  item={item}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              ))
-            : !loading && (
-                <div
-                  className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border 
-  p-12 text-center col-span-full
-  flex flex-col items-center justify-center
-  min-h-[55vh]"
-                >
-                  <Package className="w-10 h-10 mx-auto mb-4 text-gray-500" />
-                  <h3 className="text-xl font-bold  text-gray-800 dark:text-gray-100">
-                    Nenhuma ocorrência encontrada
-                  </h3>
-                </div>
-              )}
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 ">
-        <Footer branch={sheet} text="Tela inicial" />
+      <div className="px-4 mt-15 sm:px-6">
+        <Dashboard selectedBranch={sheet} occurrences={list} />
       </div>
 
       <OccurrenceModal
