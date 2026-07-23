@@ -338,7 +338,7 @@ export default function ExpedicaoPage() {
 
       <Sidebar
         goToHome={() => router.push("/")}
-        goToDashboard={() => {}}
+        goToDashboard={() => router.push("/dashboard")}
         onSearchNF={() => false}
         occurrences={[]}
         sheet="SP"

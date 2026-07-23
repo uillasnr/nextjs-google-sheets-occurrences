@@ -243,7 +243,7 @@ export default function AnaliseTransporte() {
     <>
       <Sidebar
         goToHome={() => router.push("/")}
-        goToDashboard={() => router.push("/")}
+        goToDashboard={() => router.push("/dashboard")}
         onSearchNF={() => true}
         occurrences={[]}
         sheet="SP"
