@@ -109,7 +109,7 @@ export default function Sidebar({
           {/* Dashboard */}
           <button
             onClick={() => {
-              goToDashboard(); // Mostra o Dashboard na página atual
+              router.push("/dashboard");
               setOpen(false);
             }}
             className="flex items-center gap-3 px-4 py-3 rounded-lg

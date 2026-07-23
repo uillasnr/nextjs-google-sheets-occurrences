@@ -251,3 +251,28 @@ export function groupOccurrencesByTransportadora(
 
   return result
 }
+
+export function groupOccurrencesByState(
+  occurrences: Occurrence[],
+  year?: number
+) {
+  const totals: Record<string, number> = {}
+
+  occurrences.forEach((o) => {
+    if (!o.dataNota) return
+
+    const itemYear = extractYearFromDate(o.dataNota)
+    if (!itemYear) return
+
+    if (year && itemYear !== year) return
+
+    const estado = o.estado?.trim() || "Desconhecido"
+    if (!estado) return
+
+    totals[estado] = (totals[estado] || 0) + 1
+  })
+
+  return Object.entries(totals)
+    .map(([estado, count]) => ({ estado, count }))
+    .sort((a, b) => b.count - a.count)
+}
