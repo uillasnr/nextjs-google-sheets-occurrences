@@ -526,7 +526,7 @@ export default function OccurrenceModal({
                   <TextInput
                     label="Número do Pedido"
                     name="pedido"
-                    type="number"
+                    type="text"
                     min={1}
                     value={form.pedido}
                     onChange={updateField}
