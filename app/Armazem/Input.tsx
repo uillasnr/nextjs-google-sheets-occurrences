@@ -5,6 +5,9 @@ export default function Input({
   type = "text",
   value,
   onChange,
+  min,
+  step,
+  placeholder,
 }: any) {
   return (
     <div className="space-y-1">
@@ -22,6 +25,9 @@ export default function Input({
           name={name}
           value={value}
           onChange={onChange}
+          min={min}
+          step={step}
+          placeholder={placeholder}
           className="
             w-full pl-10 pr-4 py-2.5
             rounded-xl
@@ -39,3 +45,7 @@ export default function Input({
     </div>
   );
 }
+ /*  w-full p-3 rounded-lg border transition-all
+  placeholder:text-gray-400 dark:placeholder:text-gray-500
+  bg-gray-100 text-gray-900
+  dark:bg-gray-900 dark:text-gray-100 */

@@ -19,6 +19,11 @@ export default function ProductModal({
   onSubmit,
   formData,
   handleChange,
+  onStatusChange,
+  linhas,
+  onLinhaChange,
+  onAdicionarLinha,
+  onRemoverLinha,
 }: any) {
   if (!isOpen) return null;
 
@@ -31,7 +36,7 @@ export default function ProductModal({
       />
 
       {/* MODAL */}
-      <div className="relative w-full max-w-4xl mx-4 bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 animate-fadeIn">
+      <div className="relative w-full max-w-4xl mx-4 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 animate-fadeIn">
         {/* HEADER */}
         <div className="flex items-center justify-between p-6 border-b dark:border-gray-800">
           <div>
@@ -39,7 +44,7 @@ export default function ProductModal({
               Novo Produto
             </h2>
             <p className="text-sm text-gray-500">
-              Preencha as informações do produto
+              Preencha a nota e adicione quantos produtos quiser com os mesmos dados da nota
             </p>
           </div>
 
@@ -65,10 +70,10 @@ export default function ProductModal({
               onChange={handleChange}
             />
             <Input
-              label="Ocorrência"
-              name="ocorrencia"
+              label="Responsável"
+              name="Responsavel"
               icon={<Hash />}
-              value={formData.ocorrencia}
+              value={formData.Responsavel}
               onChange={handleChange}
             />
             <Input
@@ -79,29 +84,7 @@ export default function ProductModal({
               onChange={handleChange}
             />
 
-            <Input
-              label="SKU"
-              name="sku"
-              icon={<Hash />}
-              value={formData.sku}
-              onChange={handleChange}
-            />
-            <Input
-              label="Descrição"
-              name="descricao"
-              icon={<Package />}
-              value={formData.descricao}
-              onChange={handleChange}
-            />
-            <Input
-              label="Quantidade"
-              name="quantidade"
-              type="number"
-              icon={<Package />}
-              value={formData.quantidade}
-              onChange={handleChange}
-            />
-
+          
             <Input
               label="Tipo Ocorrência"
               name="tipoOcorrencia"
@@ -126,20 +109,111 @@ export default function ProductModal({
               onChange={handleChange}
             />
 
-            <Input
-              label="Tracking"
-              name="tracking"
-              icon={<Truck />}
-              value={formData.tracking}
-              onChange={handleChange}
-            />
-            <Input
+         
+          </div>
+
+          <div className="rounded-2xl border border-gray-200 bg-gray-50/70 p-4 dark:border-gray-700/50 dark:bg-gray-700/50">
+            <p className="text-sm font-semibold text-gray-900 dark:text-white">
+              Status da nota
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {(["Pendente", "Finalizado"] as const).map((statusOption) => {
+                const isActive = formData.status === statusOption;
+                return (
+                  <button
+                    key={statusOption}
+                    type="button"
+                    onClick={() => onStatusChange(statusOption)}
+                    className={`rounded-full px-3 py-2 text-sm font-medium transition ${
+                      isActive
+                        ? "bg-blue-600 text-white shadow-sm"
+                        : "bg-white text-gray-700 hover:bg-blue-50 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+                    }`}
+                  >
+                    {statusOption}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <Input
               label="Observação"
               name="obs"
               icon={<MessageSquare />}
               value={formData.obs}
               onChange={handleChange}
             />
+
+          <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  Produtos da nota
+                </h3>
+                <p className="text-xs text-gray-500">
+                  Adicione quantas linhas de SKU/descrição/quantidade quiser.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={onAdicionarLinha}
+                className="px-3 py-2 rounded-xl bg-blue-600 text-white text-sm font-medium"
+              >
+                + Adicionar produto
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {linhas.map((linha: any, index: number) => (
+                <div
+                  key={index}
+                  className="grid grid-cols-1 md:grid-cols-[1.2fr_1.5fr_0.8fr_auto] gap-3 items-end"
+                >
+                  <Input
+                    label={`SKU ${index + 1}`}
+                    name={`sku-${index}`}
+                    icon={<Hash />}
+                    value={linha.sku}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      onLinhaChange(index, "sku", e.target.value)
+                    }
+                  />
+
+                  <Input
+                    label="Descrição"
+                    name={`descricao-${index}`}
+                    icon={<Package />}
+                    value={linha.descricao}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      onLinhaChange(index, "descricao", e.target.value)
+                    }
+                  />
+
+                  <Input
+                    label="Quantidade"
+                    name={`quantidade-${index}`}
+                    type="number"
+                    icon={<Package />}
+                    value={linha.quantidade}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      onLinhaChange(index, "quantidade", e.target.value)
+                    }
+                  />
+
+                  {linhas.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => onRemoverLinha(index)}
+                      className="px-3 py-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+                    >
+                      Remover
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* ACTIONS */}
@@ -147,8 +221,8 @@ export default function ProductModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 rounded-xl border text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
+              className="px-6 py-3 border border-gray-600 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-semibold"
+              >
               Cancelar
             </button>
 
