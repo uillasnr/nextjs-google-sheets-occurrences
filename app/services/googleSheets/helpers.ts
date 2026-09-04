@@ -55,6 +55,12 @@ export function normalizarStatus(
   const transportadora = (statusTransportadora || "").toUpperCase();
 
   if (final === "OK") return "Resolvido";
+  if (final === "INDENIZAÇÃO" || geral.includes("INDENIZAÇÃO")) {
+    return "Indenização";
+  }
+  if (geral === "PENDENTE") return "Pendente";
+  if (geral === "EM ANDAMENTO") return "Em Andamento";
+  if (geral === "RESOLVIDO") return "Resolvido";
   if (geral.includes("CANCEL")) return "Cancelado";
   if (cliente !== transportadora) return "Em Andamento";
   if (geral.includes("EM ANDAMENTO")) return "Em Andamento";

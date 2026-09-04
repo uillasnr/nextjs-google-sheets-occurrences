@@ -3,7 +3,7 @@ import type { Occurrence } from "@/types/occurrence";
 
 interface StatsProps {
   list: Occurrence[];
-  activeFilter: "Todos" | "Pendente" | "Em Andamento" | "Resolvido";
+  activeFilter: "Todos" | "Pendente" | "Em Andamento" | "Resolvido" | "Indenização";
   onFilterChange: (filter: StatsProps["activeFilter"]) => void;
 }
 
@@ -13,7 +13,7 @@ export default function Stats({
   onFilterChange,
 }: StatsProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 mb-8">
      
 
       <StatCard
@@ -54,6 +54,16 @@ export default function Stats({
         iconColor="text-emerald-600"
         active={activeFilter === "Resolvido"}
         onClick={() => onFilterChange("Resolvido")}
+      />
+
+       <StatCard
+        label="Indenização"
+        value={list.filter((i) => i.status === "Indenização").length}
+        icon={CheckCircle}
+        bgColor="bg-red-100"
+        iconColor="text-red-600"
+        active={activeFilter === "Indenização"}
+        onClick={() => onFilterChange("Indenização")}
       />
     </div>
   );

@@ -23,7 +23,7 @@ export default function Home() {
   const router = useRouter();
   const [sheet, setSheet] = useState<"SP" | "PE" | "ES" | "Fábrica" | "Tocantins_SP">("SP");
   const [statusFilter, setStatusFilter] = useState<
-    "Todos" | "Pendente" | "Em Andamento" | "Resolvido"
+    "Todos" | "Pendente" | "Em Andamento" | "Resolvido" | "Indenização"
   >("Pendente");
   const [searchedOccurrence, setSearchedOccurrence] =
     useState<Occurrence | null>(null);

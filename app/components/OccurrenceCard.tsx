@@ -64,6 +64,12 @@ const [selectedId, setSelectedId] = useState<string | null>(null);
         icon: <AlertCircle className="w-3.5 h-3.5" />,
         dot: "bg-blue-500",
       },
+      Indenização: {
+        bg: "bg-red-500/10 dark:bg-red-500/20",
+        text: "text-red-600 dark:text-red-400",
+        icon: <AlertCircle className="w-3.5 h-3.5" />,
+        dot: "bg-red-500",
+      },
       Cancelado: {
         bg: "bg-red-500/10 dark:bg-red-500/20",
         text: "text-red-600 dark:text-red-400",

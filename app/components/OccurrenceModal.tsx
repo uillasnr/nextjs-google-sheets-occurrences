@@ -47,7 +47,7 @@ const emptyForm: Occurrence = {
   tracking: "",
   obs: "",
   pendencia: "",
-  status: "Em analise",
+  status: "Pendente",
 };
 
 const ESTADO_SIGLA_PARA_NOME: Record<string, string> = {
@@ -333,14 +333,16 @@ export default function OccurrenceModal({
     const estadoNome = ESTADO_SIGLA_PARA_NOME[form.estado] || form.estado;
 
     const statusExcel =
-      ["RESOLVIDO", "FALTA DE PROVAS"].includes(
-        form.statusCliente?.toUpperCase()
-      ) &&
-      ["RESOLVIDO", "FALTA DE PROVAS"].includes(
-        form.statusTransportadora?.toUpperCase()
-      )
-        ? "OK"
-        : "";
+      form.status === "Indenização"
+        ? "Indenização"
+        : ["RESOLVIDO", "FALTA DE PROVAS"].includes(
+              form.statusCliente?.toUpperCase()
+            ) &&
+            ["RESOLVIDO", "FALTA DE PROVAS"].includes(
+              form.statusTransportadora?.toUpperCase()
+            )
+          ? "OK"
+          : "";
 
     onSubmit({
       ...form,
@@ -638,6 +640,26 @@ export default function OccurrenceModal({
                       { label: "Pendente", value: "EM ABERTO" },
                       { label: "Resolvido", value: "RESOLVIDO" },
                       { label: "Falta de provas", value: "Falta de provas" },
+                    ]}
+                  />
+                </div>
+
+                <div className="sm:col-span-2 lg:col-span-1">
+                  <SelectInput
+                    label="Indenização?"
+                    name="status"
+                    value={form.status === "Indenização" ? "Sim" : "Não"}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        status:
+                          e.target.value === "Sim" ? "Indenização" : "",
+                      })
+                    }
+                    required
+                    options={[
+                      { label: "Não", value: "Não" },
+                      { label: "Sim", value: "Sim" },
                     ]}
                   />
                 </div>
