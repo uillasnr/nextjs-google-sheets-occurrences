@@ -39,6 +39,7 @@ const formatDate = (date?: string) => {
 const statusStyle = (status?: string) => {
   if (status === "Pendente") return styles.statusPendente;
   if (status === "Em Andamento") return styles.statusAndamento;
+  if (status === "Indenização") return styles.statusIndenizacao;
   if (status === "Em analise") return styles.statusAnalise;
   return styles.statusDefault;
 };
@@ -103,6 +104,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#dbeafe",
     color: "#1e40af",
   },
+  statusIndenizacao: {
+    backgroundColor: "#fee2e2",
+    color: "#b91c1c",
+  },
   statusAnalise: {
     backgroundColor: "#ede9fe",
     color: "#5b21b6",
@@ -152,7 +157,7 @@ const OccurrencePDFDocument: React.FC<Props> = ({ occurrences, sheet }) => {
           </Text>
 
           <Text style={{ fontSize: 8.5, color: "#64748b", marginTop: 2 }}>
-            Pendente • Em Andamento
+            Pendente • Em Andamento • Indenização
           </Text>
 
           <View

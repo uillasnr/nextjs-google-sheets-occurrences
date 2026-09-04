@@ -18,12 +18,13 @@ export default function PDFReportButton({
 }: PDFReportButtonProps) {
   const [showMessage, setShowMessage] = useState(false);
 
-  // Filtrar apenas ocorrências pendentes e em andamento
+  // Filtrar ocorrências que devem aparecer no relatório
   const filteredOccurrences = occurrences.filter(
     (occ) =>
       occ.status === "Pendente" ||
       occ.status === "Em Andamento" ||
-      occ.status === "Em analise"
+      occ.status === "Em analise" ||
+      occ.status === "Indenização"
   );
 
   const handleDownloadComplete = () => {
@@ -45,7 +46,7 @@ export default function PDFReportButton({
           <span>Gerar Relatório PDF</span>
         </button>
         <p className="text-xs text-gray-500 dark:text-gray-400 text-center px-2">
-          Nenhuma ocorrência pendente ou em andamento
+          Nenhuma ocorrência pendente, em andamento ou em indenização
         </p>
       </div>
     );
